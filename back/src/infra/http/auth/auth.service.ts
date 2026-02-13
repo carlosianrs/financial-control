@@ -49,10 +49,7 @@ export class AuthService {
     const model = modelCreateUser(params, account.uid);
     const user = await this.usersRepository.create(model)
 
-    const token = await this.generateTokens(params.username)
-    await this.saveTokens(user.id, token.refresh_token)
-
-    return token;
+    return user;
   }
 
   async logout(email: string) {
