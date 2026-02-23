@@ -8,7 +8,7 @@ export async function handleSignUp(values: z.infer<typeof SignUpFormSchema>) {
   const user = await signUp(values);
 
   if (user.id) {
-    toast.error('Login', { description: 'Cadastro realizado com sucesso'});
+    toast.error('Cadastro', { description: 'Usuário criado com sucesso'});
     redirect('/auth/sign-in');
   }
 

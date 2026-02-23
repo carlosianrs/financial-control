@@ -1,9 +1,10 @@
-import { isAuthenticated } from "@/auth/auth";
+import { getTokenAuthenticated } from "@/auth/auth";
 import { redirect } from "next/navigation";
 import React from "react";
 
-export default function AuthLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  if (!isAuthenticated()) {
+export default async function AuthLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const authenticated = await getTokenAuthenticated();
+  if (authenticated) {
     redirect('/')
   }
 

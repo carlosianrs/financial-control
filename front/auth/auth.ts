@@ -3,7 +3,7 @@ import { serverConfig } from "@/lib/settings";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function isAuthenticated() {
+export async function getTokenAuthenticated() {
   const cookiesAuth = await cookies()
   return cookiesAuth.get(serverConfig.TOKEN)?.value
 }

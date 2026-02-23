@@ -23,9 +23,7 @@ export async function signIn(params: Sign): Promise<ResponseSign & ResponseError
     password: params.password
   })
     .then(({ data, status }) => ({ ...data, status }))
-    .catch(err => {
-      return { success: false, message: err.message }
-    })
+    .catch(err => ({ status: err?.status, success: false, message: err.message }))
 }
 
 export async function signUp(params: Sign): Promise<User & ResponseError> {
@@ -35,6 +33,6 @@ export async function signUp(params: Sign): Promise<User & ResponseError> {
     username: params.username,
     password: params.password,
   })
-    .then(({ data }) => ({ ...data }))
-    .catch(err => ({ success: false, message: err.message }))
+    .then(({ data, status }) => ({ ...data, status }))
+    .catch(err => ({ status: err?.status, success: false, message: err.message }))
 }

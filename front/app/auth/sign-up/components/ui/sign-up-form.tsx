@@ -10,6 +10,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { handleSignUp } from "../../lib/actions";
 
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -26,7 +29,7 @@ export function SignUpForm() {
 
   async function onSubmit(values: z.infer<typeof SignUpFormSchema>) {
     setIsLoading(true);
-    
+    await handleSignUp(values);
     setIsLoading(false);
   }
 
@@ -39,7 +42,7 @@ export function SignUpForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="form-sign-up" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form id="form-sign-up" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             <Controller
               name="name"
@@ -53,6 +56,7 @@ export function SignUpForm() {
                     aria-invalid={fieldState.invalid}
                     placeholder="Insira o seu nome"
                     autoComplete="off"
+                    disabled={isLoading}
                   />
                   {fieldState.invalid && (<FieldError errors={[fieldState.error]}/>)}
                 </Field>
@@ -63,13 +67,14 @@ export function SignUpForm() {
               control={form.control}
               render={({ field, fieldState}) => (
                 <Field>
-                  <FieldLabel htmlFor="form-sign-up-username">Nome</FieldLabel>
+                  <FieldLabel htmlFor="form-sign-up-username">Usuário</FieldLabel>
                   <Input
                     {...field}
                     id="form-sign-up-username"
                     aria-invalid={fieldState.invalid}
                     placeholder="Insira o seu usuário"
                     autoComplete="off"
+                    disabled={isLoading}
                   />
                   {fieldState.invalid && (<FieldError errors={[fieldState.error]}/>)}
                 </Field>
@@ -87,6 +92,7 @@ export function SignUpForm() {
                     aria-invalid={fieldState.invalid}
                     placeholder="Insira o seu email"
                     autoComplete="off"
+                    disabled={isLoading}
                   />
                   {fieldState.invalid && (<FieldError errors={[fieldState.error]} />)}
                 </Field>
@@ -104,6 +110,8 @@ export function SignUpForm() {
                     aria-invalid={fieldState.invalid}
                     placeholder="Insira a sua senha"
                     autoComplete="off"
+                    type={"password"}
+                    disabled={isLoading}
                   />
                 </Field>
               )}
@@ -113,9 +121,14 @@ export function SignUpForm() {
       </CardContent>
       <CardFooter>
         <Field orientation={'horizontal'}>
-          <Button type="submit" form="">
-            Cadastrar
-          </Button>
+          <div className="flex flex-col w-full items-center space-y-4">
+            <Button className="w-full" type="submit" form="form-sign-up">
+              {isLoading ? 'Carrengando...' : 'Cadastrar'}
+            </Button>
+            <Label>
+              Já possui cadastro?<Link href={'/auth/sign-in'} className="text-blue-500 underline hover:text-blue-800">Entrar</Link>
+            </Label>
+          </div>
         </Field>
       </CardFooter>
     </Card>
