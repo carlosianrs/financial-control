@@ -18,3 +18,8 @@ export const keysToken = {
   rt_private_key: env.get('REFRESH_TOKEN_PRIVATE_KEY').required().asString(),
   rt_public_key: env.get('REFRESH_TOKEN_PUBLIC_KEY').required().asString(),
 }
+
+export const googleApiConfig = {
+  url: env.get('GOOGLE_API_URL').required().asUrlString().replace(/\/$/, ''),
+  apiKey: env.get('FIREBASE_API_KEY').required().asString(),
+}

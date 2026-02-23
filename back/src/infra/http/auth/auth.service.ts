@@ -21,15 +21,15 @@ export class AuthService {
 
   async signIn(params: SignInDto) {
     const account = await this.firebaseAdminService.getUserByEmail(params.email);
-    if (!account?.passwordHash) throw new ForbiddenException("Email/Senha incorretos");
+    if (!account?.passwordHash) throw new UnauthorizedException("Email/Senha incorretos");
 
     const users = await this.usersRepository.findAll({ user_id: account.uid });
 
     const user = users.data.at(0);
-    if (!user?.username || !user.id) throw new ForbiddenException("Email/Senha incorretos");
+    if (!user?.username || !user.id) throw new UnauthorizedException("Email/Senha incorretos");
 
-    const comparePass = await bcrypt.compare(params.password, account.passwordHash)
-    if (!comparePass) throw new ForbiddenException("Email/Senha incorretos");
+    const validUser = await this.firebaseAdminService.verifyLogin(params.email, params.password)
+    if (!validUser) throw new UnauthorizedException("Email/Senha incorretos");
 
     const token = await this.generateTokens(user.username);
     await this.saveTokens(user.id, token.refresh_token)
