@@ -9,7 +9,7 @@ export function TitlePage() {
 
   return (
     <div>
-      <p className="text-2xl font-bold">{itemMenu?.title}</p>
+      <p className="text-xl md:text-2xl font-bold">{itemMenu?.title}</p>
       <p className="text-sm text-muted-foreground">{itemMenu?.description}</p>
     </div>
   )

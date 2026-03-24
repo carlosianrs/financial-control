@@ -15,7 +15,7 @@ export const itemsMenu = [
     icon: LayoutDashboard,
   },
   {
-    title: "Pagamentos",
+    title: "Transações",
     description: "Visão geral das receitas e gastos",
     url: "/payments",
     icon: Wallet,

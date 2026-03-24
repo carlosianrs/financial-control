@@ -2,6 +2,7 @@
 
 import { api } from "@/http/api/api-client";
 import { ParamsRequest, ResponseError } from "@/http/api/session";
+import { StatusPayment } from "../utils/status.util";
 
 export type Payment = {
   id: string;
@@ -11,6 +12,7 @@ export type Payment = {
   value: number;
   description: string;
   bank_account_id: string;
+  status: keyof typeof StatusPayment;
   category: {
     id: string;
     name: string;

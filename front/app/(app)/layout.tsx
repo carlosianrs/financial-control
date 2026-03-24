@@ -22,8 +22,8 @@ export default async function AppLayout({ children }: Readonly<{ children: React
       <UserProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-14 shrink-0 items-center gap-2 pr-5">
-            <div className="flex flex-1 items-center gap-2 px-3">
+          <header className="flex h-14 shrink-0 items-center gap-2 pr-5 pt-2">
+            <div className="flex flex-1 items-center px-3">
               <SidebarTrigger />
               <Separator
                 orientation="vertical"

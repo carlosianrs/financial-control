@@ -10,6 +10,10 @@ import { fetcher, ParamsRequest } from "@/http/api/session";
 import useSWRInfinite from "swr/infinite";
 import { getCategories, Payment } from "./lib/session"
 import { LoadingCard } from "@/components/loading-card";
+import { Separator } from "@/components/ui/separator";
+import { StatusColor, StatusPayment } from "./utils/status.util";
+import { Button } from "@/components/ui/button";
+import { CreateTransaction } from "./components/ui/create-transaction";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -18,6 +22,7 @@ export default function Page() {
   const [year, setYear] = useState<string>(new Date().getFullYear().toString());
   const [categories, setCategories] = useState<{ value: string, name: string }[]>([]);
   const [debouncedSearch, setDebouncedSearch] = useState<string | undefined>();
+  const [createOpen, setCreateOpen] = useState<boolean>(false);
 
   const months = [
     { value: "janeiro", name: "Janeiro" },
@@ -124,7 +129,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen flex px-4 flex-col gap-5">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         <SelectItems
           placeholder="Selecione a categoria"
           label="Categorias"
@@ -150,6 +155,10 @@ export default function Page() {
           onValueChange={setYear}
           defaultValue={new Date().getFullYear().toString()}
         />
+        
+        <Button onClick={() => setCreateOpen(true)}>
+          Adicionar transação
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -160,44 +169,55 @@ export default function Page() {
         </TabsList>
       </Tabs>
 
-      <div className={`relative grid gap-2 ${(isLoading || (payments && payments[0].data?.length)) ? 'sm:grid-cols-2 lg:grid-cols-3' : ''} grid-cols-1`}>
+      <CreateTransaction open={createOpen} setOpen={setCreateOpen} />
+
+      <div className={`relative grid gap-3 ${(isLoading || (payments && payments[0].data?.length)) ? 'sm:grid-cols-2 lg:grid-cols-3' : ''} grid-cols-1`}>
         {isLoading ? <LoadingCard /> :
           (size >= 0 && !errorPayments) ? (
             payments?.length && payments[0] && payments[0]?.data?.length ?
               payments.map(({ data }, index ) => {
                 if (data?.length) {
                   return data.map((payment, index) => (
-                    <Card className="relative overflow-hidden w-full rounded-xl h-full bg-card shadow-lg shadow-muted-foreground/15"
+                    <Card
+                      className="relative w-full h-full overflow-hidden rounded-xl bg-card hover:opacity-90 transition shadow-md shadow-blue-900/50"
                       onClick={() => {}}
                       key={`${payment.category.name}-${index}`}
                     >
                       <div
-                        className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 blur-3xl rounded-full"
-                        style={{ background: payment.category.icon_color, opacity: 0.35 }}
+                        className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full blur-3xl"
+                        style={{ background: payment.category.icon_color, opacity: 0.5 }}
                       />
-    
-                      <CardContent className="p-2 items-center justify-center">
-                        <div className="flex items-center justify-start gap-3">
+
+                      <CardContent className="p-4 py-2 flex flex-col gap-4">
+                        <div className="flex items-start gap-3">
                           <div
-                            className="flex shrink-0 items-center justify-center h-12 w-12 ml-3 rounded-xl transition-colors duration-300"
+                            className="flex shrink-0 items-center justify-center h-12 w-12 rounded-xl"
                             style={{ backgroundColor: `${payment.category.icon_color}33`, color: payment.category.icon_color }}
                           >
                             <Icon name={payment.category.icon_name as any} className="size-6" />
                           </div>
-                          <div className="flex flex-col items-start min-w-0">
-                            <p className="truncate">{payment.category.name}</p>
-                            <div className="flex flex-row gap-2 items-center justify-center">
-                              <span className="text-sm text-zinc-600 dark:text-zinc-400 break:words">Descrição: {payment.description}</span>
-                            </div>
-                            <div className="flex flex-row gap-2 items-center flex-wrap">
-                              <span className="text-md font-semibold text-zinc-900 dark:text-zinc-100">
-                                Valor:
-                              </span>
 
-                              <span className={`text-md font-bold ${payment.type == "income" ? "text-green-500" : "text-red-500"}`}>
-                                {formatMoney(payment.value)}
-                              </span>
-                            </div>
+                          <div className="flex flex-col leading-tight">
+                            <p className="font-bold text-lg truncate">{payment.category.name}</p>
+                            <span className="text-sm wrap-break-words">{payment.description || 'Sem descrição...'}</span>
+                          </div>
+                        </div>
+
+                        <Separator />
+
+                        <div className="flex items-center justify-between gap-4 flex-wrap">
+                          <div className="flex items-center gap-1 text-sm">
+                            <span>Status:</span>
+                            <span className={`font-bold ${payment.status ? StatusColor[payment.status] : ''}`}>
+                              {StatusPayment[payment.status]}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1 text-sm">
+                            <span>Valor:</span>
+                            <span className={`font-bold ${payment.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
+                              {formatMoney(payment.value)}
+                            </span>
                           </div>
                         </div>
                       </CardContent>
