@@ -4,11 +4,6 @@ import { serverConfig } from "@/lib/settings";
 import axios from "axios";
 import { cookies } from "next/headers";
 
-export type ResponseError = {
-  success: boolean;
-  message: string;
-}
-
 export const api = axios.create({
   baseURL: `${serverConfig.host}:${serverConfig.port}`,
   timeout: 30000,

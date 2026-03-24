@@ -9,8 +9,10 @@ export default async function AuthLayout({ children }: Readonly<{ children: Reac
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center flex-col px-4">
-      <div className="w-full max-w-md">{children}</div>
+    <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
+      <div className="w-full max-w-sm md:max-w-4xl">
+        {children}
+      </div>
     </div>
   )
 }

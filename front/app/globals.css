@@ -124,3 +124,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 283;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes rotate-pencil {
+  from {
+    transform: rotate(0deg);
+    transform-origin: 60px 60px;
+  }
+  to {
+    transform: rotate(360deg);
+    transform-origin: 60px 60px;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-draw {
+  animation: draw 2s ease forwards infinite;
+}
+
+.animate-rotate-pencil {
+  animation: rotate-pencil 2s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 6s linear infinite;
+}

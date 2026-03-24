@@ -1,3 +1,6 @@
+'use server'
+
+import 'server-only'
 import { getUser } from "@/http/api/get-user";
 import { serverConfig } from "@/lib/settings";
 import { cookies } from "next/headers";
@@ -8,7 +11,7 @@ export async function getTokenAuthenticated() {
   return cookiesAuth.get(serverConfig.TOKEN)?.value
 }
 
-export async function logout() {
+export async function deleteToken() {
   const cookiesAuth = await cookies()
   return cookiesAuth.delete(serverConfig.TOKEN)
 }
@@ -29,4 +32,9 @@ export async function auth() {
   }
 
   redirect('api/auth/sign-out')
+}
+
+export async function logout() {
+  await deleteToken()
+  redirect('/')
 }
