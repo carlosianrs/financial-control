@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { DatePicker } from "@/components/date-picker"
 import { toast } from "sonner"
 import { SelectItems } from "@/components/select-items"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type CreateTransactionProps = {
   open: boolean;
@@ -25,6 +26,7 @@ type CreateTransactionProps = {
 
 export function CreateTransaction({ open, setOpen }: CreateTransactionProps) {
   const [banks, setBanks] = useState<{ name: string, value: string }[] | null>(null);
+  const [type, setType] = useState<string>('expenses');
 
   const { control, handleSubmit, reset } = useForm<transactionsSchemaType>({
     resolver: zodResolver(transactionsSchema),
@@ -34,6 +36,7 @@ export function CreateTransaction({ open, setOpen }: CreateTransactionProps) {
       desc: '',
       status: '',
       bank: '',
+      category: '',
       date: new Date(),
     }
   })
@@ -54,29 +57,53 @@ export function CreateTransaction({ open, setOpen }: CreateTransactionProps) {
       <form id="form-transaction" onSubmit={handleSubmit(onSubmit)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Criar transação</DialogTitle>
+            <DialogTitle>Nova transação</DialogTitle>
             <DialogDescription>
               Crie suas transações informando os dados essenciais.
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
+            <Tabs value={type} onValueChange={setType} className="w-full">
+              <TabsList variant="line" className="w-full grid grid-cols-3">
+                <TabsTrigger value="income">Receitas</TabsTrigger>
+                <TabsTrigger value="expenses">Despesas</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Controller
+              name="desc"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Descrição</FieldLabel>
+                  <Input
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Digite a descrição"
+                    autoComplete="off"
+                    {...field}
+                  />
+                </Field>
+              )}
+            />
+            <Controller
+              name="category"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Categoria</FieldLabel>
+                  <SelectItems
+                    placeholder="Selecione a categoria"
+                    items={[
+                      { name: 'Pendente', value: 'pending' },
+                      { name: 'Pago', value: 'paid' },
+                      { name: 'Received', value: 'received' },
+                    ]}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  />
+                </Field>
+              )}
+            />
             <div className="flex flex-row gap-5">
-              <Controller
-                name="type"
-                control={control}
-                render={({ field, fieldState}) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Tipo</FieldLabel>
-                    <Input
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Selecione o tipo"
-                      autoComplete="off"
-                      {...field}
-                    />
-                    {fieldState.invalid && (<FieldError errors={[fieldState.error]} />)}
-                  </Field>
-                )}
-              />
               <Controller
                 name="value"
                 control={control}
@@ -89,6 +116,20 @@ export function CreateTransaction({ open, setOpen }: CreateTransactionProps) {
                       autoComplete="off"
                       type="number"
                       {...field}
+                    />
+                  </Field>
+                )}
+              />
+              <Controller
+                name="date"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Data</FieldLabel>
+                    <DatePicker
+                      onChange={field.onChange}
+                      value={field.value}
+                      placeholder="Selecione a data da transação"
                     />
                   </Field>
                 )}
@@ -123,35 +164,6 @@ export function CreateTransaction({ open, setOpen }: CreateTransactionProps) {
                     ]}
                     onValueChange={field.onChange}
                     value={field.value}
-                  />
-                </Field>
-              )}
-            />              
-            <Controller
-              name="date"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Data</FieldLabel>
-                  <DatePicker
-                    onChange={field.onChange}
-                    value={field.value}
-                    placeholder="Selecione a data da transação"
-                  />
-                </Field>
-              )}
-            />
-            <Controller
-              name="desc"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Descrição</FieldLabel>
-                  <Input
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Digite a descrição"
-                    autoComplete="off"
-                    {...field}
                   />
                 </Field>
               )}
