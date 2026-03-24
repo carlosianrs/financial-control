@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { GetCategoryDto } from "./dto/categories.dto";
+import { CreateCategoryDto, GetCategoryDto } from "./dto/categories.dto";
 import { CategoriesRepository } from "src/infra/database/firestore/repositories/categories.repository";
+import { modelCategory, modelCreateCategory } from "src/infra/database/firestore/mappers/categories.mapper";
 
 @Injectable()
 export class CategoriesService {
@@ -9,10 +10,22 @@ export class CategoriesService {
   ) {}
 
   async findMany(params: GetCategoryDto) {
-    await this.categoriesRepository.findAll(params);
+    return await this.categoriesRepository.findAll(params);
   }
 
   async findById(id: string) {
     await this.categoriesRepository.findById(id);
+  }
+
+  async create(params: CreateCategoryDto) {
+    const model = modelCreateCategory(params);
+    await this.categoriesRepository.create(model);
+    return { message: 'Categoria criada com sucesso' };
+  }
+
+  async update(id: string, params: CreateCategoryDto) {
+    const model = modelCreateCategory(params);
+    await this.categoriesRepository.update(id, model);
+    return { message: 'Categoria atualizada com sucesso' };
   }
 }

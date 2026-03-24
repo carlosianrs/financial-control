@@ -22,9 +22,9 @@ export class UsersRepository {
     })
 
     const users = await query.get();
-    if (users.empty || !users?.length) return { data: [], results: 0 }
+    if (users.empty) return { data: [], results: 0 }
 
-    const response: User[] = users?.map((doc: FirebaseFirestore.DocumentData) => modelUser(doc))
+    const response: User[] = users?.docs?.map((doc: FirebaseFirestore.DocumentData) => modelUser(doc))
 
     return { data: response, results: response.length };
   }

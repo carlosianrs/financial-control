@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotAcceptableException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotAcceptableException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { FirebaseAdminService } from "src/infra/database/firebase-admin/firebase-admin.service";
 import { UsersRepository } from "src/infra/database/firestore/repositories/users.repository";
@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { keysToken } from "src/config/settings.config";
 import { modelCreateUser } from "src/infra/database/firestore/mappers/users.mapper";
 import { SignInDto, SignUpDto } from "./dto/auth.dto";
-import { FirestoreService } from "src/infra/database/firestore/firestore.service";
+import { GoogleApiService } from "../services/google-apis/google-apis.service";
 
 @Injectable()
 export class AuthService {
@@ -14,22 +14,22 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly usersRepository: UsersRepository,
     private readonly firebaseAdminService: FirebaseAdminService,
-    private readonly firestoreService: FirestoreService,
+    private readonly googleApiService: GoogleApiService,
   ) {}
 
   private readonly expires_token = 3600;
 
   async signIn(params: SignInDto) {
     const account = await this.firebaseAdminService.getUserByEmail(params.email);
-    if (!account?.passwordHash) throw new UnauthorizedException("Email/Senha incorretos");
+    if (!account?.uid) throw new UnauthorizedException("Email/Senha incorretos");
 
     const users = await this.usersRepository.findAll({ user_id: account.uid });
 
     const user = users.data.at(0);
     if (!user?.username || !user.id) throw new UnauthorizedException("Email/Senha incorretos");
 
-    const validUser = await this.firebaseAdminService.verifyLogin(params.email, params.password)
-    if (!validUser) throw new UnauthorizedException("Email/Senha incorretos");
+    const validUser = await this.googleApiService.verifyLogin(params.email, params.password);
+    if (!validUser?.idToken) throw new UnauthorizedException("Email/Senha incorretos");
 
     const token = await this.generateTokens(user.username);
     await this.saveTokens(user.id, token.refresh_token)
@@ -80,16 +80,16 @@ export class AuthService {
       {
         privateKey: keysToken.at_private_key,
         algorithm: 'RS256',
-        expiresIn: this.expires_token,
+        expiresIn: this.expires_token * 24,
       }
     )
 
     const refreshToken = await this.jwtService.signAsync(
       payload,
       {
-        privateKey: keysToken.at_private_key,
+        privateKey: keysToken.rt_private_key,
         algorithm: 'RS256',
-        expiresIn: this.expires_token,
+        expiresIn: this.expires_token * 24 * 7,
       }
     )
 
@@ -98,8 +98,9 @@ export class AuthService {
 
     return {
       access_token: accessToken,
+      expires_in_at: new Date(currentDate.getTime() + this.expires_token * 1000),
       refresh_token: refreshToken,
-      expires_in: new Date(currentDate.getTime() + this.expires_token * 1000)
+      expires_in_rt: new Date(currentDate.getTime() + (this.expires_token * 24 * 7) * 1000)
     }
   }
 
@@ -107,5 +108,16 @@ export class AuthService {
     const hash = await bcrypt.hash(refreshToken, 10)
 
     await this.usersRepository.updateUser(id_user, { refresh_token: hash })
+  }
+
+  async getUser(email: string, username: string) {
+    console.log(email)
+    const account = await this.firebaseAdminService.getUserByEmail(email);
+    const users = await this.usersRepository.findAll({ username });
+
+    const user = users.data.at(0);
+    if (account?.email || !user?.refresh_token || !user.id) throw new NotFoundException("Usuário não encontrado");
+
+    return user;
   }
 }

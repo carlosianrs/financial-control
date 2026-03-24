@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable, Logger, ParseUUIDPipe, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
-import { Observable } from "rxjs";
 import { keysToken } from "src/config/settings.config";
+import { FirebaseAdminService } from "src/infra/database/firebase-admin/firebase-admin.service";
 import { UsersRepository } from "src/infra/database/firestore/repositories/users.repository";
 
 export enum Method {
@@ -17,6 +17,7 @@ export class AtGuard implements CanActivate {
   constructor (
     private readonly jwtService: JwtService,
     private readonly userRepository: UsersRepository,
+    private readonly firebaseAdmin: FirebaseAdminService,
   ) {}
 
   private readonly logger = new Logger(AtGuard.name);
@@ -38,15 +39,18 @@ export class AtGuard implements CanActivate {
       })
       request['user'] = payload;
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error(err?.message);
       throw new UnauthorizedException("Token expirado");
     }
 
-    const userExisting = await this.userRepository.findAll(request['user'].username);
+    const userExisting = await this.userRepository.findAll({ username: request['user'].username });
     const user = userExisting.data.at(0);
     if (!user?.id) throw new UnauthorizedException("Usuário inválido")
 
-    request['user'] = user;
+    const account = await this.firebaseAdmin.getUserByUID(user?.user_id)
+    if (!account?.email) throw new UnauthorizedException("Conta inválida")
+
+    request['user'] = { ...user, email: account.email };
     
     return true;
   }

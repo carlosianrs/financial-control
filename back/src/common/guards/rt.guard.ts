@@ -19,7 +19,7 @@ export class RtGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.getTokenHeader(request);
-    if (!token) throw new UnauthorizedException("Usuário sem acesso")
+    if (!token) throw new UnauthorizedException("Usuário sem acesso2")
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -29,7 +29,7 @@ export class RtGuard implements CanActivate {
       request['user'] = { ...payload, refreshToken: token };
     } catch (err) {
       this.logger.error(err)
-      throw new UnauthorizedException("Usuário sem acesso")
+      throw new UnauthorizedException("Usuário sem acesso1")
     }
 
     return true;

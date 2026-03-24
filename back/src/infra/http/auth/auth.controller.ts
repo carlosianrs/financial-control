@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Post, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignInDto, SignUpDto } from "./dto/auth.dto";
 import { GetCurrentUser } from "src/common/decorators/getUser.decorator";
@@ -19,6 +19,12 @@ export class AuthController {
   @Post('/sign-up')
   async signUp(@Body() params: SignUpDto) {
     return await this.authService.signUp(params)
+  };
+
+  @UseGuards(AtGuard)
+  @Get('/user')
+  async getUser(@GetCurrentUser() user: any) {
+    return user;
   };
 
   @UseGuards(AtGuard)

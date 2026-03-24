@@ -9,10 +9,10 @@ export class UsersService {
   ) {}
 
   async findMany(params: GetUserDto) {
-    await this.usersRepository.findAll(params);
+    return await this.usersRepository.findAll(params);
   }
 
   async findById(id: string) {
-    await this.usersRepository.findById(id);
+    return await this.usersRepository.findById(id);
   }
 }

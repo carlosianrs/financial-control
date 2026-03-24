@@ -1,3 +1,12 @@
+export type ResponseFirebase<T> = {
+  data: T;
+  results: number;
+  nextCursor: {
+    created_at: string;
+    id: string;
+  } | null;
+}
+
 export type User = {
   id?: string;
   name: string;

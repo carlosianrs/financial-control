@@ -1,32 +1,32 @@
 import { Transform } from "class-transformer";
-import { IsDateString, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 import { ReportType } from "src/infra/database/firestore/types/reports.type";
 
 export class GetReportDto {
-  @IsString()
-  user_id: string;
-
   @IsOptional()
   @IsEnum(ReportType)
   @IsString()
   type: ReportType;
 
   @IsOptional()
-  @IsNumber()
-  value: number;
-
-  @IsOptional()
-  @IsString()
-  description: string;
-
-  @IsOptional()
   @IsString()
   category_id: string;
 
+  @IsString()
+  month_year: string;
+
   @IsOptional()
-  @Transform(({ value }) => value ? new Date(value) : null)
-  @IsDateString()
-  report_date: Date;
+  @Transform(({ value }) => Number(value) || null)
+  @IsNumber()
+  limit?: number;
+  
+  @IsOptional()
+  @IsString()
+  nextCreatedAt?: string;
+
+  @IsOptional()
+  @IsString()
+  nextId?: string;
 }
 
 export class CreateReportDto {
@@ -44,7 +44,12 @@ export class CreateReportDto {
   @IsString()
   category_id: string;
 
-  @Transform(({ value }) => value ? new Date(value) : null)
-  @IsDateString()
-  report_date: Date;
+  @IsString()
+  bank_account_id: string;
+
+  @IsNumber()
+  day: number;
+  
+  @IsString()
+  month_year: string;
 }

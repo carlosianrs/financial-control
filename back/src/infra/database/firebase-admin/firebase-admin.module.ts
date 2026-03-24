@@ -18,7 +18,7 @@ import { firebaseConfig } from "src/config/settings.config";
         }
         return admin;
       }
-    }
+    },
   ],
   exports: ['FIREBASE_ADMIN']
 })
