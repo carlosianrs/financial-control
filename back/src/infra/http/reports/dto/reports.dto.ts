@@ -42,6 +42,9 @@ export class CreateReportDto {
   description?: string;
 
   @IsString()
+  status: string;
+
+  @IsString()
   category_id: string;
 
   @IsString()

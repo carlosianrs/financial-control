@@ -9,6 +9,7 @@ export type Report = {
   type: string;
   value: number;
   description: string;
+  status: string;
   category_id?: string;
   bank_account_id: string;
   day: number;
