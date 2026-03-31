@@ -37,9 +37,7 @@ export async function middleware() {
   if (!token) throw new Error('Token inválido')
 
   const public_key = await importSPKI(serverConfig.rt_token!, 'RS256')
-  const { payload } = await jwtVerify(token, public_key, {
-    algorithms: ['RS256']
-  });
+  const { payload } = await jwtVerify(token, public_key);
 
   return payload;
 }

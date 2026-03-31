@@ -1,7 +1,8 @@
 'use server'
 
-import { api, ResponseError } from "@/http/api/api-client";
+import { api } from "@/http/api/api-client";
 import { User } from "./get-user";
+import { ResponseError } from "./session";
 
 type ResponseSign = {
   access_token: string;

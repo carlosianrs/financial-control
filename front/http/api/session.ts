@@ -6,9 +6,9 @@ export type ParamsRequest<T> = {
   data: T;
   results: number;
   nextCursor: {
-    created_at: string;
+    date: string;
     id: string;
-  }[] | null;
+  } | null;
 }
 
 export type ResponseError = {

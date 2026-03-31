@@ -25,7 +25,7 @@ api.interceptors.response.use(
     } else if (error.message === 'Network Error') {
       message = 'Conexão instável, verifique a sua internet'
     } else if (!error.response) {
-      message = `Erro desconhecido: ${error.message}`
+      message = `Sem resposta: ${error}`
     }
 
     if (message) error.message = message;
