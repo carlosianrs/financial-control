@@ -16,7 +16,7 @@ export async function login(values: z.infer<typeof SignInFormSchema>) {
         path: '/',
     })
 
-    return { status: user.status, messsage: null };
+    return { status: user.status, message: null };
   }
 
   return { status: user.status, message: user.message };

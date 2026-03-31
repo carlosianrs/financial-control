@@ -14,8 +14,7 @@ export async function signIn(values: z.infer<typeof SignInFormSchema>) {
     redirect(values.redirect);
   }
 
-  toast.warning(user.message, {
-    description: user.status == HttpStatusCode.Unauthorized
-      ? 'Credênciais incorretas' : 'Não foi possível realizar login'
-  })  
+  toast.warning(user.status == HttpStatusCode.Unauthorized ? 'Credênciais incorretas' : 'Não foi possível realizar login', {
+    description: user.message
+  })
 }
