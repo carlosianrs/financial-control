@@ -1,19 +1,19 @@
 'use client'
 
-import { Icon } from "@/components/icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatMoney } from "@/lib/utils";
 import Image from "next/image";
 import { Cell, Pie, PieChart } from "recharts";
 
+export interface CardData {
+  name: string,
+  value: number,
+  color: string,
+  iconPath?: string,
+}
+
 interface CardAccountProps {
-  data: {
-    name: string,
-    value: number,
-    color: string,
-    accountIconPath?: string,
-    accountName?: string,
-  }[];
+  data: CardData[];
   title: string;
   description: string;
 }
@@ -25,7 +25,8 @@ export default function CardWithPieChart({ title, description, data }: CardAccou
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="grid grid-cols-[200px_1fr] gap-8 items-center h-full">
+      <CardContent className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-center h-full">
+        <div className="flex justify-center items-center">
         <PieChart width={200} height={200}>
           <Pie
             data={data}
@@ -40,21 +41,22 @@ export default function CardWithPieChart({ title, description, data }: CardAccou
             ))}
           </Pie>
         </PieChart>
+        </div>
         <div className="flex flex-col gap-4">
-          {data.map((item) => {
+          {data.length ? data.map((item, index) => {
             return (
-              <div key={item.name} className="flex items-center justify-between">
+              <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full" style={{ background: item.color }} />
-                  {/* {item?.accountIconPath && item?.accountName && (<div className="flex items-center justify-center w-10 h-10 rounded-md bg-purple-500/20">
+                  {item.iconPath && (<div className="flex items-center justify-center w-6 h-6 rounded-md bg-transparent">
                     <Image
-                      src={item.accountIconPath}
-                      alt={item.accountName}
+                      src={'/banks/nubank.png'}
+                      alt={item.iconPath}
                       width={24}
                       height={24}
                       className="object-contain"
                     />
-                  </div>)} */}
+                  </div>)}
 
                   <span className="text-sm font-medium text-foreground">{item.name}</span>
                 </div>
@@ -62,7 +64,7 @@ export default function CardWithPieChart({ title, description, data }: CardAccou
                 <span className="font-bold">{formatMoney(item.value)}</span>
               </div>
             )
-          })}
+          }) : <p>Nenhum dado encontrado</p>}
         </div>
       </CardContent>
     </Card>
