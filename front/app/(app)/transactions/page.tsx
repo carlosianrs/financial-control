@@ -8,12 +8,13 @@ import { formatMoney } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 import { fetcher, ParamsRequest } from "@/http/api/session";
 import useSWRInfinite from "swr/infinite";
-import { getCategories, Payment } from "./lib/session"
+import { getCategories, Transaction } from "./lib/session"
 import { LoadingCard } from "@/components/loading-card";
 import { Separator } from "@/components/ui/separator";
-import { StatusColor, StatusPayment } from "./utils/status.util";
+import { StatusColor, StatusTransaction } from "./utils/status.util";
 import { Button } from "@/components/ui/button";
 import { CreateTransaction } from "./components/ui/create-transaction";
+import { months, years } from "@/lib/contans";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -23,47 +24,25 @@ export default function Page() {
   const [categories, setCategories] = useState<{ value: string, name: string }[]>([]);
   const [debouncedSearch, setDebouncedSearch] = useState<string | undefined>();
   const [createOpen, setCreateOpen] = useState<boolean>(false);
-
-  const months = [
-    { value: "janeiro", name: "Janeiro" },
-    { value: "fevereiro", name: "Fevereiro" },
-    { value: "março", name: "Março" },
-    { value: "abril", name: "Abril" },
-    { value: "maio", name: "Maio" },
-    { value: "junho", name: "Junho" },
-    { value: "julho", name: "Julho" },
-    { value: "agosto", name: "Agosto" },
-    { value: "setembro", name: "Setembro" },
-    { value: "outubro", name: "Outubro" },
-    { value: "novembro", name: "Novembro" },
-    { value: "dezembro", name: "Dezembro" }
-  ]
-
-  const currentYear = new Date().getFullYear();
-
-  const years = Array.from({ length: 5 }, (_, index) => {
-    const year = (currentYear - index).toString();
-    return { value: year, name: year };
-  });
+  const [currentTransaction, setCurrentTransaction] = useState<Transaction | null>(null);
 
   const getParams = useCallback((pgIndx: number, previousPageData?: any) => {
     const baseQuery = debouncedSearch?.trim();
 
     if (previousPageData?.nextCursor) {
-      const { created_at, id } = previousPageData.nextCursor;
-      return `/report/${baseQuery}&nextCreatedAt=${created_at}&nextId=${id}`;
+      const { date, id } = previousPageData.nextCursor;
+      return `/transaction/${baseQuery}&nextDate=${date}&nextId=${id}`;
     } else if (baseQuery) {
-      return `/report${baseQuery}`;
+      return `/transaction${baseQuery}`;
     } else {
       const monthCurrent = new Date().toLocaleString("pt-BR", { month: "long" });
       const yearCurrent = new Date().getFullYear()?.toString();
-      return `/report?month_year=${monthCurrent}/${yearCurrent}`;
+      return `/transaction?month=${monthCurrent}&year=${yearCurrent}`;
     }
   }, [debouncedSearch])
 
-  const { data: payments, isLoading, isValidating, size, setSize, mutate, error: errorPayments } = useSWRInfinite<ParamsRequest<Payment[]>>(getParams, fetcher, {
+  const { data: transactions, isLoading, isValidating, size, setSize, mutate, error: errorTransactions } = useSWRInfinite<ParamsRequest<Transaction[]>>(getParams, fetcher, {
     revalidateOnFocus: true,
-    parallel: true,
     onErrorRetry(err, key, config, revalidate, revalidateOpts) {
       if (err.status == 401) return;
     },
@@ -74,48 +53,30 @@ export default function Page() {
       const monthCurrent = month || new Date().toLocaleString("pt-BR", { month: "long" });
       const yearCurrent = year || new Date().getFullYear()?.toString()
       
-      let search = `?month_year=${monthCurrent}/${yearCurrent}`;
+      let search = `?month=${monthCurrent}&year=${yearCurrent}`;
       if (activeTab != "overview") search += `&type=${activeTab}`;
+      if (categorySelect) search += `&category_id=${categorySelect}`
 
       setDebouncedSearch(search);
     }, 500);
 
     return () => clearTimeout(handler);
-  }, [month, year, activeTab]);
+  }, [month, year, categorySelect, activeTab]);
 
   useEffect(() => {
-    const scrollArea = document?.querySelector('#scroll-area');
-    const meta = payments?.at(-1)?.results;
-
     function handleScroll() {
-      if (scrollArea && meta && !isValidating) {
-        const { scrollTop, scrollHeight, clientHeight } = scrollArea;
+      const meta = transactions?.at(-1)?.nextCursor;
+      if (!meta || isValidating) return;
 
-        if (scrollTop + clientHeight >= scrollHeight - 10) {
-          setSize(prev => prev + 1);
-        }
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 10) {
+        setSize(prev => prev + 1);
       }
     }
 
-    const intervalCheckScroll: NodeJS.Timeout = setInterval(() => {
-      if (scrollArea && meta && !isValidating) {
-        if (
-          scrollArea?.clientHeight == scrollArea?.scrollHeight && !errorPayments
-        ) {
-          setSize(prev => prev + 1);
-        } else {
-          clearInterval(intervalCheckScroll);
-        }
-      }
-    }, 500);
+    window.addEventListener('scroll', handleScroll);
 
-    scrollArea?.addEventListener('scroll', handleScroll);
-
-    return () => {
-      scrollArea?.removeEventListener('scroll', handleScroll);
-      clearInterval(intervalCheckScroll);
-    };
-  }, [payments, setSize, errorPayments, isValidating]);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [transactions, isValidating, setSize]);
 
   useEffect(() => {
     getCategories()
@@ -150,7 +111,7 @@ export default function Page() {
         <SelectItems
           placeholder="Selecione o ano"
           label="Anos"
-          items={years}
+          items={years()}
           value={year}
           onValueChange={setYear}
           defaultValue={new Date().getFullYear().toString()}
@@ -169,37 +130,46 @@ export default function Page() {
         </TabsList>
       </Tabs>
 
-      <CreateTransaction open={createOpen} setOpen={setCreateOpen} />
+      <CreateTransaction
+        currentTransaction={currentTransaction}
+        setCurrentTransaction={setCurrentTransaction}
+        open={createOpen}
+        setOpen={setCreateOpen}
+        mutate={mutate}
+      />
 
-      <div className={`relative grid gap-3 ${(isLoading || (payments && payments[0].data?.length)) ? 'sm:grid-cols-2 lg:grid-cols-3' : ''} grid-cols-1`}>
+      <div className={`relative grid gap-3 ${(isLoading || (transactions && transactions[0].data?.length)) ? 'sm:grid-cols-2 lg:grid-cols-3' : ''} grid-cols-1`}>
         {isLoading ? <LoadingCard /> :
-          (size >= 0 && !errorPayments) ? (
-            payments?.length && payments[0] && payments[0]?.data?.length ?
-              payments.map(({ data }, index ) => {
+          (size >= 0 && !errorTransactions) ? (
+            transactions?.length && transactions[0] && transactions[0]?.data?.length ?
+              transactions.map(({ data }, index ) => {
                 if (data?.length) {
-                  return data.map((payment, index) => (
+                  return data.map((transaction, index) => (
                     <Card
                       className="relative w-full h-full overflow-hidden rounded-xl bg-card hover:opacity-90 transition shadow-md shadow-blue-900/50"
-                      onClick={() => {}}
-                      key={`${payment.category.name}-${index}`}
+                      onClick={() => {
+                        setCurrentTransaction(transaction);
+                        setCreateOpen(true);
+                      }}
+                      key={`${transaction.category.name}-${index}`}
                     >
                       <div
                         className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full blur-3xl"
-                        style={{ background: payment.category.icon_color, opacity: 0.5 }}
+                        style={{ background: transaction.category.icon_color, opacity: 0.5 }}
                       />
 
                       <CardContent className="p-4 py-2 flex flex-col gap-4">
                         <div className="flex items-start gap-3">
                           <div
                             className="flex shrink-0 items-center justify-center h-12 w-12 rounded-xl"
-                            style={{ backgroundColor: `${payment.category.icon_color}33`, color: payment.category.icon_color }}
+                            style={{ backgroundColor: `${transaction.category.icon_color}33`, color: transaction.category.icon_color }}
                           >
-                            <Icon name={payment.category.icon_name as any} className="size-6" />
+                            <Icon name={transaction.category.icon_name as any} className="size-6" />
                           </div>
 
                           <div className="flex flex-col leading-tight">
-                            <p className="font-bold text-lg truncate">{payment.category.name}</p>
-                            <span className="text-sm wrap-break-words">{payment.description || 'Sem descrição...'}</span>
+                            <p className="font-bold text-lg truncate">{transaction.category.name}</p>
+                            <span className="text-sm wrap-break-words">{transaction.description || 'Sem descrição...'}</span>
                           </div>
                         </div>
 
@@ -208,15 +178,15 @@ export default function Page() {
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                           <div className="flex items-center gap-1 text-sm">
                             <span>Status:</span>
-                            <span className={`font-bold ${payment.status ? StatusColor[payment.status] : ''}`}>
-                              {StatusPayment[payment.status]}
+                            <span className={`font-bold ${transaction.status ? StatusColor[transaction.status] : ''}`}>
+                              {StatusTransaction[transaction.status]}
                             </span>
                           </div>
 
                           <div className="flex items-center gap-1 text-sm">
                             <span>Valor:</span>
-                            <span className={`font-bold ${payment.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
-                              {formatMoney(payment.value)}
+                            <span className={`font-bold ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
+                              {formatMoney(transaction.value)}
                             </span>
                           </div>
                         </div>
@@ -232,7 +202,7 @@ export default function Page() {
             )
           ) : (
             <div className="text-sm text-zinc-400 text-center">
-              <p>{errorPayments?.data?.message || "Falha ao buscar transações"}</p>
+              <p>{errorTransactions?.data?.message || "Falha ao buscar transações"}</p>
             </div>
           )
         }

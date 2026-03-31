@@ -17,7 +17,7 @@ export const itemsMenu = [
   {
     title: "Transações",
     description: "Visão geral das receitas e gastos",
-    url: "/payments",
+    url: "/transactions",
     icon: Wallet,
   },
   {

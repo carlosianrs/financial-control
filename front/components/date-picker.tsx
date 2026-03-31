@@ -21,7 +21,7 @@ export function DatePicker({ value, onChange, placeholder }: DatePickerProps) {
           variant="outline"
           className="justify-start font-normal"
         >
-          {value ? value.toLocaleDateString() : (placeholder || "Selecione a data")}
+          {value ? `${value.toLocaleDateString()}` : (placeholder || "Selecione a data")}
         </Button>
       </PopoverTrigger>
 

@@ -30,7 +30,7 @@ export function SelectItems({ defaultValue, placeholder, label, items, value, on
 
   return (
     <div className="relative w-full">
-      <Select value={value || ""} onValueChange={(v) => onValueChange?.(v)}>
+      <Select value={value || defaultValue || ""} onValueChange={(v) => onValueChange?.(v)}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -47,11 +47,13 @@ export function SelectItems({ defaultValue, placeholder, label, items, value, on
       </Select>
       {value && (
         <Button
+          type="button"
           onClick={clear}
-          className="absolute right-8 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           variant={'ghost'}
+          size="icon"
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 opacity-70 hover:opacity-100"
         >
-          <X size={16} />
+          <X size={14} />
         </Button>
       )}
     </div>
