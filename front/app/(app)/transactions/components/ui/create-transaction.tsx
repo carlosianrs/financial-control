@@ -18,12 +18,12 @@ import { toast } from "sonner"
 import { SelectItems } from "@/components/select-items"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, TrendingDown, TrendingUp } from "lucide-react"
-import { StatusTransaction } from "../../utils/status.util"
 import { createTransaction, getBanksAccount, getCategories, Transaction, updateTransaction } from "../../lib/session"
-import { statusList } from "@/lib/contans"
+import { statusList } from "@/lib/contants"
 import { CreateTransactionSkeleton } from "./create-transaction-skeleton"
 import { SWRInfiniteKeyedMutator } from "swr/infinite"
 import { ParamsRequest } from "@/http/api/session"
+import { StatusTransaction } from "../../lib/types"
 
 type CreateTransactionProps = {
   open: boolean;
@@ -124,7 +124,7 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
 
   useEffect(() => {
     if (currentTransaction) {
-      form.setValue('bank', currentTransaction.bank_account_id)
+      form.setValue('bank', currentTransaction.bank_account.id)
       form.setValue('category', currentTransaction.category.id)
       form.setValue('date', new Date(currentTransaction.payment_date))
       form.setValue('desc', currentTransaction.description)
@@ -138,7 +138,7 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
   }, [currentTransaction])
 
   const status = useMemo(() => {
-    return statusList.filter(s => s.name !== (type === 'income' ? StatusTransaction.paid : StatusTransaction.received))
+    return statusList.filter(s => s.value !== (type === 'income' ? StatusTransaction.paid : StatusTransaction.received))
   }, [type])
 
   useEffect(() => {

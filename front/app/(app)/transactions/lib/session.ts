@@ -2,7 +2,7 @@
 
 import { api } from "@/http/api/api-client";
 import { ParamsRequest, ResponseError } from "@/http/api/session";
-import { StatusTransaction } from "../utils/status.util";
+import { StatusTransaction } from "./types";
 
 export type Transaction = {
   id: string;
@@ -11,7 +11,12 @@ export type Transaction = {
   type: string;
   value: number;
   description: string;
-  bank_account_id: string;
+  bank_account: {
+    id: string;
+    name: string;
+    icon_path: string;
+    icon_color: string;
+  };
   status: keyof typeof StatusTransaction;
   category: {
     id: string;

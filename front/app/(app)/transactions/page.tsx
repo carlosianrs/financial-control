@@ -11,10 +11,21 @@ import useSWRInfinite from "swr/infinite";
 import { getCategories, Transaction } from "./lib/session"
 import { LoadingCard } from "@/components/loading-card";
 import { Separator } from "@/components/ui/separator";
-import { StatusColor, StatusTransaction } from "./utils/status.util";
 import { Button } from "@/components/ui/button";
 import { CreateTransaction } from "./components/ui/create-transaction";
-import { months, years } from "@/lib/contans";
+import { months, years } from "@/lib/contants";
+
+export enum StatusColor {
+  pending = 'text-yellow-400',
+  paid = 'text-red-400',
+  received = 'text-green-400',
+}
+
+export enum StatusFormatTransaction {
+  pending = 'Pendente',
+  paid = 'Pago',
+  received = 'Recebido',
+}
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -178,8 +189,8 @@ export default function Page() {
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                           <div className="flex items-center gap-1 text-sm">
                             <span>Status:</span>
-                            <span className={`font-bold ${transaction.status ? StatusColor[transaction.status] : ''}`}>
-                              {StatusTransaction[transaction.status]}
+                            <span className={`font-bold ${StatusColor[transaction.status]}`}>
+                              {StatusFormatTransaction[transaction.status]}
                             </span>
                           </div>
 

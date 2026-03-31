@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
-import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { DialogFooter } from "@/components/ui/dialog"
 
 export function CreateTransactionSkeleton() {
   return (
