@@ -22,7 +22,7 @@ export class BankAccountsRepository {
     const bank_accounts = await query.get();
     if (bank_accounts.empty) return { data: [], results: 0 }
 
-    const response: BankAccount[] = bank_accounts.map((doc: FirebaseFirestore.DocumentData) => modelBankAccount(doc))
+    const response: BankAccount[] = bank_accounts.docs?.map((doc: FirebaseFirestore.DocumentData) => modelBankAccount(doc))
 
     return { data: response, results: response.length };
   }

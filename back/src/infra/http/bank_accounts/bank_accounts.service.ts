@@ -10,11 +10,11 @@ export class BankAccountsService {
   ) {}
 
   async findMany(params: GetBankAccountDto) {
-    await this.bankAccountsRepository.findAll(params);
+    return await this.bankAccountsRepository.findAll(params);
   }
 
   async findById(id: string) {
-    await this.bankAccountsRepository.findById(id);
+    return await this.bankAccountsRepository.findById(id);
   }
 
   async create(params: CreateBankAccountDto) {

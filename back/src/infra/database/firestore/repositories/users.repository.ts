@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { FirestoreService } from "../firestore.service";
-import { Report } from "../types/reports.type";
 import { UpdateUser, User } from "../types/users.type";
 import { modelUser } from "../mappers/users.mapper";
 import { GetUserDto } from "src/infra/http/users/dto/users.dto";

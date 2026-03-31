@@ -17,7 +17,7 @@ export class GetCategoryDto {
 
   @IsOptional()
   @IsString()
-  nextCreatedAt: string;
+  nextDate: string;
 
   @IsOptional()
   @IsString()
@@ -28,6 +28,10 @@ export class CreateCategoryDto {
   @IsString()
   name: string;
 
+  @IsOptional()
+  @IsString()
+  description?: string;
+  
   @IsOptional()
   @IsString()
   icon_name?: string;

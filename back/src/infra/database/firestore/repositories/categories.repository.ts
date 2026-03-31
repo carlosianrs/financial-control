@@ -12,7 +12,7 @@ export class CategoriesRepository {
     private readonly firestoreService: FirestoreService
   ) {}
 
-  async findAll({ limit, nextId, nextCreatedAt, ...params }: GetCategoryDto): Promise<ResponseFirebase<Category[]>> {
+  async findAll({ limit, nextId, nextDate, ...params }: GetCategoryDto): Promise<ResponseFirebase<Category[]>> {
     let query: any = this.firestoreService.categories;
 
     Object.keys(params).forEach(key => {
@@ -21,10 +21,12 @@ export class CategoriesRepository {
       }
     })
 
-    query = query.orderBy("created_at", "desc").orderBy("__name__", "desc").limit(limit || 10);
+    const pageLimit = (limit || 10)
 
-    if (nextCreatedAt && nextId) {
-      query = query.startAfter(Timestamp.fromDate(new Date(nextCreatedAt)), nextId);
+    query = query.orderBy("created_at", "desc").orderBy("__name__", "desc").limit(pageLimit + 1);
+
+    if (nextDate && nextId) {
+      query = query.startAfter(Timestamp.fromDate(new Date(nextDate)), nextId);
     }
 
     const categories = await query.get();
@@ -32,15 +34,17 @@ export class CategoriesRepository {
 
     const response: Category[] = categories.docs?.map((doc: FirebaseFirestore.DocumentData) => modelCategory(doc))
 
-    const lastDoc = categories.docs[categories.docs.length - 1];
+    const hasNextPage = response.length > pageLimit;
+    const docs = hasNextPage ? response.slice(0, pageLimit) : response;
+    const lastDoc = docs[docs.length - 1];
 
     return {
-      data: response,
-      results: response.length,
-      nextCursor: {
-        created_at: lastDoc?.data()?.created_at?.toDate() || null,
-        id: lastDoc.id,
-      }
+      data: docs,
+      results: docs.length,
+      nextCursor: hasNextPage ? {
+        date: lastDoc.created_at.toISOString(),
+        id: lastDoc.id!,
+      } : null
     };
   }
 

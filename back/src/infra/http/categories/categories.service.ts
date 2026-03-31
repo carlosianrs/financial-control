@@ -14,7 +14,7 @@ export class CategoriesService {
   }
 
   async findById(id: string) {
-    await this.categoriesRepository.findById(id);
+    return await this.categoriesRepository.findById(id);
   }
 
   async create(params: CreateCategoryDto) {

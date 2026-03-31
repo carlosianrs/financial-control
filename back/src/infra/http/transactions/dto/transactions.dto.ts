@@ -1,19 +1,22 @@
 import { Transform } from "class-transformer";
-import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
-import { ReportType } from "src/infra/database/firestore/types/reports.type";
+import { IsDateString, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { TransactionType } from "src/infra/database/firestore/types/transactions.type";
 
-export class GetReportDto {
+export class GetTransactionDto {
   @IsOptional()
-  @IsEnum(ReportType)
+  @IsEnum(TransactionType)
   @IsString()
-  type: ReportType;
+  type: TransactionType;
 
   @IsOptional()
   @IsString()
   category_id: string;
 
   @IsString()
-  month_year: string;
+  month: string;
+
+  @IsString()
+  year: string;
 
   @IsOptional()
   @Transform(({ value }) => Number(value) || null)
@@ -22,15 +25,15 @@ export class GetReportDto {
   
   @IsOptional()
   @IsString()
-  nextCreatedAt?: string;
+  nextDate?: string;
 
   @IsOptional()
   @IsString()
   nextId?: string;
 }
 
-export class CreateReportDto {
-  @IsEnum(ReportType)
+export class CreateTransactionDto {
+  @IsEnum(TransactionType)
   @IsString()
   type: string;
 
@@ -49,10 +52,7 @@ export class CreateReportDto {
 
   @IsString()
   bank_account_id: string;
-
-  @IsNumber()
-  day: number;
-  
-  @IsString()
-  month_year: string;
+ 
+  @IsDateString()
+  payment_date: string;
 }
