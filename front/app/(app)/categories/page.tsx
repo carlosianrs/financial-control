@@ -10,56 +10,51 @@ import { LoadingCard } from "@/components/loading-card";
 import { Category } from "./lib/session";
 
 export default function Page() {
-  const getParams = useCallback((pgIndx: number, previousPageData?: any) => {
-    if (previousPageData?.nextCursor) {
-      const { created_at, id } = previousPageData.nextCursor;
-      return `/category?nextCreatedAt=${created_at}&nextId=${id}`;
-    } else {
-      return `/category`;
-    }
-  }, [])
+const getParams = useCallback((pageIndex: number, previousPageData?: ParamsRequest<Category[]>) => {
+  // ✅ PRIMEIRA PÁGINA
+  if (pageIndex === 0) {
+    console.log('0')
+    return `/category`;
+  }
 
+  // 🚨 AINDA NÃO TEM DADOS DA ANTERIOR → NÃO FAZ NADA
+  if (!previousPageData) {
+    console.log('pp')
+    return null;
+  }
+
+  // ⛔ ACABOU AS PÁGINAS
+  if (!previousPageData.nextCursor) {
+    console.log('nada')
+    return null;
+  }
+  console.log(previousPageData.nextCursor)
+
+  // 🔥 PRÓXIMA PÁGINA
+  const { date, id } = previousPageData.nextCursor;
+  return `/category?nextDate=${date}&nextId=${id}`;
+}, []);
   const { data: categories, isLoading, isValidating, size, setSize, mutate, error: errorCategories } = useSWRInfinite<ParamsRequest<Category[]>>(getParams, fetcher, {
     revalidateOnFocus: true,
-    parallel: true,
     onErrorRetry(err, key, config, revalidate, revalidateOpts) {
       if (err.status == 401) return;
     },
   })
 
   useEffect(() => {
-    const scrollArea = document?.querySelector('#scroll-area');
-    const meta = categories?.at(-1)?.results;
-
     function handleScroll() {
-      if (scrollArea && meta && !isValidating) {
-        const { scrollTop, scrollHeight, clientHeight } = scrollArea;
+      const meta = categories?.at(-1)?.nextCursor;
+      if (!meta || isValidating) return;
 
-        if (scrollTop + clientHeight >= scrollHeight - 10) {
-          setSize(prev => prev + 1);
-        }
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 10) {
+        setSize(prev => prev + 1);
       }
     }
 
-    const intervalCheckScroll: NodeJS.Timeout = setInterval(() => {
-      if (scrollArea && meta && !isValidating) {
-        if (
-          scrollArea?.clientHeight == scrollArea?.scrollHeight && !errorCategories
-        ) {
-          setSize(prev => prev + 1);
-        } else {
-          clearInterval(intervalCheckScroll);
-        }
-      }
-    }, 500);
+    window.addEventListener('scroll', handleScroll);
 
-    scrollArea?.addEventListener('scroll', handleScroll);
-
-    return () => {
-      scrollArea?.removeEventListener('scroll', handleScroll);
-      clearInterval(intervalCheckScroll);
-    };
-  }, [categories, setSize, errorCategories, isValidating]);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [categories, isValidating, setSize]);
 
   return (
     <div className="min-h-screen flex px-4 flex-col gap-5">
@@ -90,7 +85,7 @@ export default function Page() {
                           <div className="flex flex-col items-start min-w-0">
                             <p className="truncate">{category.name}</p>
                             <div className="flex flex-row gap-2 items-center justify-center">
-                              <span className="text-sm text-zinc-600 dark:text-zinc-400 break:words">Descrição:</span>
+                              <span className="text-sm text-zinc-600 dark:text-zinc-400 break:words">Descrição: {category.description || 'Sem descrição'}</span>
                             </div>
                           </div>
                         </div>
