@@ -7,6 +7,7 @@ export type Transaction = {
   id: string;
   user_id: string;
   type: string;
+  status: string;
   value: number;
   description: string;
   bank_account: {

@@ -6,8 +6,9 @@ import { SelectItems } from "@/components/select-items";
 import { useEffect, useState } from "react";
 import CardWithPieChart, { CardData } from "./components/card-with-pie-chart";
 import { getTransactions } from "./lib/session";
-import { chartConfig, months, years } from "@/lib/contans";
+import { chartConfig, months, years } from "@/lib/contants";
 import { DashboardSkeleton } from "./components/dashboard-skeleton";
+import { StatusTransaction, TypeTransaction } from "../transactions/lib/types";
 
 export default function Page() {
   const [month, setMonth] = useState<string>(new Date().toLocaleString("pt-BR", { month: "long" }));
@@ -18,9 +19,10 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dailyBalance, setDailyBalance] = useState<{ date: string, income: number, expenses: number }[]>([]);
   const [balance, setBalance] = useState<{ expenses: number, income: number, current: number }>({
-    expenses: 0,
-    income: 0,
-    current: 0
+    expenses: 0, income: 0, current: 0
+  });
+  const [balancePending, setBalancePending] = useState<{ expenses: number, income: number, current: number }>({
+    expenses: 0, income: 0, current: 0
   });
 
   useEffect(() => {
@@ -54,14 +56,18 @@ export default function Page() {
         let income = 0;
         let expenses = 0;
         let current = 0;
+
+        let incomePending = 0;
+        let expensesPending = 0;
+        let balPending = 0;
   
         res.data.forEach(t => {
           const paymentDate = t.payment_date?.toString().split('T')[0]
           const currentTransaction = transactions.get(paymentDate)
           transactions.set(paymentDate, {
             date: paymentDate,
-            income: (currentTransaction?.income || 0) + (t.type == 'income' ? t.value : 0),
-            expenses: (currentTransaction?.expenses || 0) + (t.type == 'expenses' ? t.value : 0),
+            income: (currentTransaction?.income || 0) + (t.type == TypeTransaction.income && t.status == StatusTransaction.received ? t.value : 0),
+            expenses: (currentTransaction?.expenses || 0) + (t.type == TypeTransaction.expenses && t.status == StatusTransaction.paid ? t.value : 0),
           })
 
           const currentBank = banks.get(t.bank_account.id)
@@ -79,12 +85,19 @@ export default function Page() {
             color: t.category.icon_color
           })
   
-          if (t.type == 'income') {
-            income += t.value;
-            current += t.value;
-          } else if (t.type == 'expenses') {
-            expenses += t.value;
-            current -= t.value;
+          const isIncome = t.type === TypeTransaction.income;
+          const isPending = t.status === StatusTransaction.pending;
+          const value = isIncome ? t.value : -t.value;
+
+          if (isPending) {
+            balPending += value;
+            if (isIncome) incomePending += t.value;
+            else expensesPending += t.value;
+            
+          } else {
+            current += value;
+            if (isIncome) income += t.value;
+            else expenses += t.value;
           }
         })
   
@@ -129,9 +142,32 @@ export default function Page() {
       ) : (
         <>
           <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1">
-            <MainCard title="Receitas" value={balance.income} glowColor="#22c55e" textColor="text-green-500" icon={{ name: 'TrendingUp', color: "bg-green-500/20" }} />
-            <MainCard title="Despesas" value={balance.expenses} glowColor="#fb2c36" textColor="text-red-500" icon={{ name: 'TrendingDown', color: "bg-red-500/20" }} />
-            <MainCard title="Saldo Atual" value={balance.current} glowColor="#60a5fa" textColor="text-blue-400" icon={{ name: 'Wallet', color: "bg-blue-400/20" }} />
+            <MainCard
+              title="Receitas"
+              value={balance.income}
+              valuePending={balancePending.income}
+              glowColor="#22c55e"
+              textColor="text-green-500"
+              icon={{ name: 'TrendingUp', color: "bg-green-500/20" }}
+            />
+
+            <MainCard
+              title="Despesas"
+              value={balance.expenses}
+              valuePending={balancePending.expenses}
+              glowColor="#fb2c36"
+              textColor="text-red-500"
+              icon={{ name: 'TrendingDown', color: "bg-red-500/20" }}
+            />
+
+            <MainCard
+              title="Saldo Atual"
+              value={balance.current}
+              valuePending={balancePending.current}
+              glowColor="#60a5fa"
+              textColor="text-blue-400"
+              icon={{ name: 'Wallet', color: "bg-blue-400/20" }}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-green-500">
