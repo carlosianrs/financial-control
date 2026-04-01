@@ -33,7 +33,7 @@ export const years = () => {
   });
 }
 
-export const chartConfig = {
+export const chartAreaConfig = {
   balance: {
     label: "Saldo",
     color: "#60A5FA",
@@ -46,4 +46,15 @@ export const chartConfig = {
     label: "Despesa",
     color: "#FB2C36"
   }
+} satisfies ChartConfig;
+
+export const chartBarConfig = {
+  expenses: {
+    label: "Despesas",
+    color: "#fb2c36",
+  },
+  goal: {
+    label: "Meta",
+    color: "#60A5FA",
+  },
 } satisfies ChartConfig;

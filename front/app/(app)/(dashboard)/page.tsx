@@ -6,9 +6,11 @@ import { SelectItems } from "@/components/select-items";
 import { useEffect, useState } from "react";
 import CardWithPieChart, { CardData } from "./components/card-with-pie-chart";
 import { getTransactions } from "./lib/session";
-import { chartConfig, months, years } from "@/lib/contants";
+import { chartAreaConfig, chartBarConfig, months, years } from "@/lib/contants";
 import { DashboardSkeleton } from "./components/dashboard-skeleton";
 import { StatusTransaction, TypeTransaction } from "../transactions/lib/types";
+import { ChartBarMultiple } from "./components/bar-chart-multiple";
+import { getCategories } from "../transactions/lib/session";
 
 export default function Page() {
   const [month, setMonth] = useState<string>(new Date().toLocaleString("pt-BR", { month: "long" }));
@@ -18,6 +20,7 @@ export default function Page() {
   const [expensesPerCategory, setExpensesPerCategory] = useState<CardData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dailyBalance, setDailyBalance] = useState<{ date: string, income: number, expenses: number }[]>([]);
+  const [expensesPlanning, setExpensesPlanning] = useState<{ category: string, expenses: number, goal: number }[]>([]);
   const [balance, setBalance] = useState<{ expenses: number, income: number, current: number }>({
     expenses: 0, income: 0, current: 0
   });
@@ -38,9 +41,12 @@ export default function Page() {
       try {
         setIsLoading(true);
         const res = await getTransactions(debouncedSearch);
+        const resCategories = await getCategories();
+
         const banks = new Map<string, CardData>();
         const categories = new Map<string, CardData>();
         const transactions = new Map<string, { date: string, income: number, expenses: number }>();
+        const planning = new Map<string, { category: string, expenses: number, goal: number }>();
 
         const currentDate = new Date();
         currentDate.setHours(currentDate.getHours() - 3)
@@ -61,49 +67,72 @@ export default function Page() {
         let expensesPending = 0;
         let balPending = 0;
   
-        res.data.forEach(t => {
-          const paymentDate = t.payment_date?.toString().split('T')[0]
+        res.data.forEach(transaction => {
+          const paymentDate = transaction.payment_date?.toString().split('T')[0]
+          
+          const isIncome = transaction.type === TypeTransaction.income;
+          const isPending = transaction.status === StatusTransaction.pending;
+          const value = isIncome ? transaction.value : -transaction.value;
+          
           const currentTransaction = transactions.get(paymentDate)
           transactions.set(paymentDate, {
             date: paymentDate,
-            income: (currentTransaction?.income || 0) + (t.type == TypeTransaction.income && t.status == StatusTransaction.received ? t.value : 0),
-            expenses: (currentTransaction?.expenses || 0) + (t.type == TypeTransaction.expenses && t.status == StatusTransaction.paid ? t.value : 0),
+            income: (currentTransaction?.income || 0) + (isIncome && !isPending ? transaction.value : 0),
+            expenses: (currentTransaction?.expenses || 0) + (!isIncome && !isPending ? transaction.value : 0),
           })
 
-          const currentBank = banks.get(t.bank_account.id)
-          banks.set(t.bank_account.id, {
-            name: t.bank_account.name,
-            value: t.value + (currentBank?.value || 0),
-            color: t.bank_account.icon_color,
-            iconPath: t.bank_account.icon_path,
+          const currentBank = banks.get(transaction.bank_account.id)
+          banks.set(transaction.bank_account.id, {
+            name: transaction.bank_account.name,
+            value: (currentBank?.value || 0) + value,
+            color: transaction.bank_account.icon_color,
+            iconPath: transaction.bank_account.icon_path,
           })
   
-          const currentCategory = categories.get(t.category.id)
-          categories.set(t.category.id, {
-            name: t.category.name,
-            value: t.value + (currentCategory?.value || 0),
-            color: t.category.icon_color
-          })
-  
-          const isIncome = t.type === TypeTransaction.income;
-          const isPending = t.status === StatusTransaction.pending;
-          const value = isIncome ? t.value : -t.value;
+          if (!isIncome) {
+            const currentCategory = categories.get(transaction.category.id)
+            categories.set(transaction.category.id, {
+              name: transaction.category.name,
+              value: transaction.value + (currentCategory?.value || 0),
+              color: transaction.category.icon_color
+            })
+          }
 
           if (isPending) {
             balPending += value;
-            if (isIncome) incomePending += t.value;
-            else expensesPending += t.value;
+            if (isIncome) incomePending += transaction.value;
+            else expensesPending += transaction.value;
             
           } else {
             current += value;
-            if (isIncome) income += t.value;
-            else expenses += t.value;
+            if (isIncome) income += transaction.value;
+            else expenses += transaction.value;
           }
+        })
+
+        resCategories.data.forEach((category) => {
+          const currentCategory = categories.get(category.id)
+
+          if (!currentCategory) {
+            categories.set(category.id, {
+              name: category.name,
+              value: 0,
+              color: category.icon_color
+            })
+          }
+
+          planning.set(category.id, {
+            category: category.name,
+            expenses: currentCategory?.value || 0,
+            goal: 0,
+          })
         })
   
         setBalance({ expenses, income, current });
+        setBalancePending({ expenses: expensesPending, income: incomePending, current: balPending });
         setBalancePerBank(Array.from(banks.values()));
         setExpensesPerCategory(Array.from(categories.values()));
+        setExpensesPlanning(Array.from(planning.values()));
         setDailyBalance(Array.from(transactions.values())
           .sort((a, b) => Number(a.date.slice(-2)) - Number(b.date.slice(-2)))
         );
@@ -170,22 +199,35 @@ export default function Page() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-green-500">
+          <div className="grid grid-cols-1 gap-3 text-green-500">
             <CardWithPieChart
               title="Saldo por conta"
               description="Saldo atual de cada conta"
               data={balancePerBank}
             />
+          </div>
+
+          <ChartAreaInteractive config={chartAreaConfig} data={dailyBalance} />
+
+          <div className="grid grid-cols-2 gap-3 text-green-500">
             <CardWithPieChart
               title="Gastos por categoria"
               description="Porcentagem de gasto em cada categoria"
               data={expensesPerCategory}
             />
+            <CardWithPieChart
+              title="Receitas x Despesas"
+              description="Comparativo de receitas e gastos"
+              data={[
+                { name: 'Receitas', value: balance.income, color: '#22c55e' },
+                { name: 'Despesas', value: balance.expenses, color: '#fb2c36' }
+              ]}
+            />
           </div>
+
+          <ChartBarMultiple config={chartBarConfig} data={expensesPlanning} />
         </>
       )}
-          
-      <ChartAreaInteractive config={chartConfig} data={dailyBalance} />
     </div>
   )
 }
