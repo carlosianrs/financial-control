@@ -29,7 +29,7 @@ export function ChartAreaInteractive({ config, data }: ChartAreaInteractiveProps
   }, []);
 
   return (
-    <Card className="pt-0 bg-card shadow-lg shadow-muted-foreground/15">
+    <Card className="bg-card shadow-lg shadow-muted-foreground/15">
       <CardHeader className="flex items-center gap-2 space-y-0 py-5 sm:flex-row justify-between">
         <div className="grid flex-1 gap-1">
           <CardTitle>Evolução de Saldo</CardTitle>

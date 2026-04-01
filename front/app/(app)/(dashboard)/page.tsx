@@ -209,7 +209,7 @@ export default function Page() {
 
           <ChartAreaInteractive config={chartAreaConfig} data={dailyBalance} />
 
-          <div className="grid grid-cols-2 gap-3 text-green-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-green-500">
             <CardWithPieChart
               title="Gastos por categoria"
               description="Porcentagem de gasto em cada categoria"

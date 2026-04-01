@@ -1,6 +1,7 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { Bar, BarChart, XAxis, YAxis } from "recharts"
+
 import {
   Card,
   CardContent,
@@ -10,50 +11,53 @@ import {
 } from "@/components/ui/card"
 import {
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
 
-export const description = "A multiple bar chart"
-
-interface ChartBarProps {
+interface ChartBarMultipleProps {
   config: ChartConfig;
   data: {
     category: string;
     expenses: number;
     goal: number;
   }[];
-};
+}
 
-export function ChartBarMultiple({ config, data }: ChartBarProps) {
+export function ChartBarMultiple({ config, data }: ChartBarMultipleProps) {
   return (
-    <Card>
+    <Card className="bg-card shadow-lg shadow-muted-foreground/15">
       <CardHeader>
         <CardTitle>Planejamento de Despesas</CardTitle>
         <CardDescription>Meta x Despesas de cada categoria</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer className="h-64 w-full" config={config}>
-          <BarChart barSize={20} accessibilityLayer layout="vertical" data={data}>
-            <CartesianGrid vertical={false} />
-            <XAxis
+        <ChartContainer config={config}>
+          <BarChart
+            className="w-full"
+            accessibilityLayer
+            data={data}
+            layout="vertical"
+            margin={{
+              left: -5,
+            }}
+          >
+            <XAxis type="number" hide />
+            <YAxis
               dataKey="category"
+              type="category"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => value.slice(0, 6)}
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent indicator="dashed" />}
+              content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="expenses" fill="#fb2c36" radius={4} />
-            <Bar dataKey="goal" fill="#60A5FA" radius={4} />
-            
-            <ChartLegend content={<ChartLegendContent />} />
+            <Bar dataKey="expenses" fill="var(--color-expenses)" radius={5} />
+            <Bar dataKey="goal" fill="var(--color-goal)" radius={5} />
           </BarChart>
         </ChartContainer>
       </CardContent>

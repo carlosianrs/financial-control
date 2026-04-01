@@ -51,7 +51,7 @@ export const chartAreaConfig = {
 export const chartBarConfig = {
   expenses: {
     label: "Despesas",
-    color: "#fb2c36",
+    color: "#ff5c00",
   },
   goal: {
     label: "Meta",
