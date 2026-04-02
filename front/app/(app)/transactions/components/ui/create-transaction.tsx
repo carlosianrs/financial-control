@@ -46,6 +46,7 @@ const defaultValuesForm = {
 export function CreateTransaction({ currentTransaction, setCurrentTransaction, open, setOpen, mutate }: CreateTransactionProps) {
   const [banksAccount, setBanksAccount] = useState<{ name: string, value: string }[] | null>(null);
   const [categories, setCategories] = useState<{ name: string, value: string }[] | null>(null);
+  const [status, setStatus] = useState<{ name: string, value: string }[] | null>(null);
   const [type, setType] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -137,14 +138,20 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
     setType(currentTransaction?.type || 'expenses')
   }, [currentTransaction])
 
-  const status = useMemo(() => {
-    return statusList.filter(s => s.value !== (type === 'income' ? StatusTransaction.paid : StatusTransaction.received))
+  useEffect(() => {
+    const categoriesFilter = categories?.filter(c => type === 'income' ? c.name != 'Renda' : c.name == 'Renda')
+    setCategories(categoriesFilter || null);
+
+    const statusFilter = statusList.filter(s => s.value !== (type === 'income' ? StatusTransaction.paid : StatusTransaction.received))
+    setStatus(statusFilter);
   }, [type])
 
   useEffect(() => {
     const currentStatus = form.getValues('status')
-    if (!status.some(s => s.value === currentStatus)) form.setValue('status', '')
-  }, [status, form])
+    const currentCategory = form.getValues('category')
+    if (!status?.some(s => s.value === currentStatus)) form.setValue('status', '')
+    if (!categories?.some(c => c.value === currentCategory)) form.setValue('category', '')
+  }, [categories, status, form])
 
   function resetForm(isOpen: boolean) {
     if (!isOpen) {
@@ -278,7 +285,7 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
                       <FieldLabel>Status</FieldLabel>
                       <SelectItems
                         placeholder="Selecione o status"
-                        items={status}
+                        items={status || []}
                         onValueChange={field.onChange}
                         value={field.value}
                       />

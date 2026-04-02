@@ -5,7 +5,7 @@ import { ChartAreaInteractive } from "./components/area-chart";
 import { SelectItems } from "@/components/select-items";
 import { useEffect, useState } from "react";
 import CardWithPieChart, { CardData } from "./components/card-with-pie-chart";
-import { getTransactions } from "./lib/session";
+import { getPlannings, getTransactions } from "./lib/session";
 import { chartAreaConfig, chartBarConfig, months, years } from "@/lib/contants";
 import { DashboardSkeleton } from "./components/dashboard-skeleton";
 import { StatusTransaction, TypeTransaction } from "../transactions/lib/types";
@@ -21,12 +21,9 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dailyBalance, setDailyBalance] = useState<{ date: string, income: number, expenses: number }[]>([]);
   const [expensesPlanning, setExpensesPlanning] = useState<{ category: string, expenses: number, goal: number }[]>([]);
-  const [balance, setBalance] = useState<{ expenses: number, income: number, current: number }>({
-    expenses: 0, income: 0, current: 0
-  });
-  const [balancePending, setBalancePending] = useState<{ expenses: number, income: number, current: number }>({
-    expenses: 0, income: 0, current: 0
-  });
+  const [balance, setBalance] = useState<{ expenses: number, income: number, current: number }>({ expenses: 0, income: 0, current: 0 });
+  const [balancePending, setBalancePending] = useState<{ expenses: number, income: number, current: number }>({ expenses: 0, income: 0, current: 0 });
+  const [balancePlanning, setBalancePlanning] = useState<{ expenses: number, income: number, current: number }>({ expenses: 0, income: 0, current: 0 });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -41,12 +38,15 @@ export default function Page() {
       try {
         setIsLoading(true);
         const res = await getTransactions(debouncedSearch);
-        const resCategories = await getCategories();
+        const [resCategories, resPlannings] = await Promise.all([
+          getCategories(),
+          getPlannings(month, year)
+        ])
 
         const banks = new Map<string, CardData>();
         const categories = new Map<string, CardData>();
         const transactions = new Map<string, { date: string, income: number, expenses: number }>();
-        const planning = new Map<string, { category: string, expenses: number, goal: number }>();
+        const planningPerCategory = new Map<string, { category: string, expenses: number, goal: number }>();
 
         const currentDate = new Date();
         currentDate.setHours(currentDate.getHours() - 3)
@@ -66,6 +66,10 @@ export default function Page() {
         let incomePending = 0;
         let expensesPending = 0;
         let balPending = 0;
+
+        let incomePlanning = 0;
+        let expensesPlanning = 0;
+        let balPlanning = 0;
   
         res.data.forEach(transaction => {
           const paymentDate = transaction.payment_date?.toString().split('T')[0]
@@ -121,21 +125,42 @@ export default function Page() {
             })
           }
 
-          planning.set(category.id, {
-            category: category.name,
-            expenses: currentCategory?.value || 0,
-            goal: 0,
-          })
+          const isIncomeCategory = category.name == 'Renda';
+          const planningCategory = resPlannings.data?.find(rp => rp.category.id == category.id);
+
+          if (!isIncomeCategory) {
+            planningPerCategory.set(category.id, {
+              category: category.name,
+              expenses: currentCategory?.value || 0,
+              goal: planningCategory?.value || 0,
+            })
+            expensesPlanning += (planningCategory?.value || 0)
+          } else {
+            incomePlanning += (planningCategory?.value || 0)
+          }
+
+          const value = (isIncomeCategory ? (planningCategory?.value || 0) : -(planningCategory?.value || 0));
+          balPlanning += value;
         })
-  
+        
+        resPlannings.data?.forEach(rp => {
+          const planningExists = planningPerCategory.get(rp.category.id)
+          if (rp.category.name != 'Renda' && !planningExists) {
+            planningPerCategory.set(rp.category.id, {
+              category: rp.category.name,
+              expenses: 0,
+              goal: rp.value,
+            })
+          }
+        });
+
         setBalance({ expenses, income, current });
         setBalancePending({ expenses: expensesPending, income: incomePending, current: balPending });
+        setBalancePlanning({ expenses: expensesPlanning, income: incomePending, current: balPlanning });
         setBalancePerBank(Array.from(banks.values()));
         setExpensesPerCategory(Array.from(categories.values()));
-        setExpensesPlanning(Array.from(planning.values()));
-        setDailyBalance(Array.from(transactions.values())
-          .sort((a, b) => Number(a.date.slice(-2)) - Number(b.date.slice(-2)))
-        );
+        setExpensesPlanning(Array.from(planningPerCategory.values()));
+        setDailyBalance(Array.from(transactions.values()).sort((a, b) => Number(a.date.slice(-2)) - Number(b.date.slice(-2))));
       } finally {
         setIsLoading(false);
       }
@@ -222,6 +247,33 @@ export default function Page() {
                 { name: 'Receitas', value: balance.income, color: '#22c55e' },
                 { name: 'Despesas', value: balance.expenses, color: '#fb2c36' }
               ]}
+            />
+          </div>
+          
+          <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1">
+            <MainCard
+              title="Receitas Prevista"
+              value={balancePlanning.income}
+              glowColor="#22c55e"
+              textColor="text-green-500"
+              icon={{ name: 'TrendingUp', color: "bg-green-500/20" }}
+            />
+
+            <MainCard
+              title="Despesas Prevista"
+              value={balancePlanning.expenses}
+              glowColor="#fb2c36"
+              textColor="text-red-500"
+              icon={{ name: 'TrendingDown', color: "bg-red-500/20" }}
+            />
+
+            <MainCard
+              title="Saldo Previsto"
+              value={balancePlanning.current}
+              valuePending={balancePending.current}
+              glowColor="#fa8500"
+              textColor="text-yellow-500"
+              icon={{ name: 'Wallet', color: "bg-blue-400/20" }}
             />
           </div>
 

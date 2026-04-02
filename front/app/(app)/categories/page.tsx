@@ -2,7 +2,6 @@
 
 import { Icon } from "@/components/icon";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatMoney } from "@/lib/utils";
 import { useCallback, useEffect } from "react";
 import { fetcher, ParamsRequest } from "@/http/api/session";
 import useSWRInfinite from "swr/infinite";
@@ -10,30 +9,15 @@ import { LoadingCard } from "@/components/loading-card";
 import { Category } from "./lib/session";
 
 export default function Page() {
-const getParams = useCallback((pageIndex: number, previousPageData?: ParamsRequest<Category[]>) => {
-  // ✅ PRIMEIRA PÁGINA
-  if (pageIndex === 0) {
-    console.log('0')
+  const getParams = useCallback((pgIndx: number, previousPageData?: any) => {
+    if (previousPageData?.nextCursor) {
+      const { date, id } = previousPageData.nextCursor;
+      return `/category?nextDate=${date}&nextId=${id}`;
+    }
+
     return `/category`;
-  }
+  }, [])
 
-  // 🚨 AINDA NÃO TEM DADOS DA ANTERIOR → NÃO FAZ NADA
-  if (!previousPageData) {
-    console.log('pp')
-    return null;
-  }
-
-  // ⛔ ACABOU AS PÁGINAS
-  if (!previousPageData.nextCursor) {
-    console.log('nada')
-    return null;
-  }
-  console.log(previousPageData.nextCursor)
-
-  // 🔥 PRÓXIMA PÁGINA
-  const { date, id } = previousPageData.nextCursor;
-  return `/category?nextDate=${date}&nextId=${id}`;
-}, []);
   const { data: categories, isLoading, isValidating, size, setSize, mutate, error: errorCategories } = useSWRInfinite<ParamsRequest<Category[]>>(getParams, fetcher, {
     revalidateOnFocus: true,
     onErrorRetry(err, key, config, revalidate, revalidateOpts) {

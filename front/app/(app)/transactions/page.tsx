@@ -42,7 +42,7 @@ export default function Page() {
 
     if (previousPageData?.nextCursor) {
       const { date, id } = previousPageData.nextCursor;
-      return `/transaction/${baseQuery}&nextDate=${date}&nextId=${id}`;
+      return `/transaction${baseQuery}&nextDate=${date}&nextId=${id}`;
     } else if (baseQuery) {
       return `/transaction${baseQuery}`;
     } else {

@@ -5,7 +5,7 @@ import { Icon } from "./icon";
 interface MainCardProps {
   title: string;
   value: number;
-  valuePending: number;
+  valuePending?: number;
   textColor: string
   glowColor: string
   icon?: {
@@ -30,10 +30,12 @@ export function MainCard({ title, value, valuePending, icon, textColor, glowColo
           <div className="flex flex-col items-start justify-start">
             <p className="font-bold text-lg">{title}</p>
             <p className={`text-xl font-bold ${textColor}`}>{formatMoney(value)}</p>
-            <div className="flex flex-row gap-2">
-              <p className={`text-sm text-muted-foreground`}>Pendente:</p>
-              <p className="text-sm font-bold text-yellow-400">{formatMoney(valuePending)}</p>
-            </div>
+            {!!valuePending && valuePending > 0 && (
+              <div className="flex flex-row gap-2">
+                <p className={`text-sm text-muted-foreground`}>Pendente:</p>
+                <p className="text-sm font-bold text-yellow-400">{formatMoney(valuePending)}</p>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
