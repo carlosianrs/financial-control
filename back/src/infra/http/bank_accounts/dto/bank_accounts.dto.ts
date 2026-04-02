@@ -3,11 +3,11 @@ import { IsOptional, IsString } from "class-validator";
 export class GetBankAccountDto {
   @IsOptional()
   @IsString()
-  name: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
-  icon_name: string;
+  icon_name?: string;
 }
 
 export class CreateBankAccountDto {

@@ -4,6 +4,7 @@ import { TransactionsModule } from "./transactions/transactions.module";
 import { UsersModule } from "./users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { BankAccountsModule } from "./bank_accounts/bank_accounts.module";
+import { PlanningsModule } from "./plannings/plannings.module";
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { BankAccountsModule } from "./bank_accounts/bank_accounts.module";
     TransactionsModule,
     UsersModule,
     AuthModule,
-    BankAccountsModule
+    BankAccountsModule,
+    PlanningsModule,
   ]
 })
 export class HttpModule {}

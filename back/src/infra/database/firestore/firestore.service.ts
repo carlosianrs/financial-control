@@ -9,6 +9,7 @@ export class FirestoreService {
     this.transactions = this.firestore.collection('transactions');
     this.categories = this.firestore.collection('categories');
     this.bank_accounts = this.firestore.collection('bank_accounts');
+    this.plannings = this.firestore.collection('plannings');
   }
   
   private firestore: FirebaseFirestore.Firestore;
@@ -16,4 +17,5 @@ export class FirestoreService {
   public transactions: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   public categories: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   public bank_accounts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+  public plannings: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
 }

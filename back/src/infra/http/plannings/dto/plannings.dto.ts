@@ -1,14 +1,16 @@
 import { Transform } from "class-transformer";
 import { IsNumber, IsOptional, IsString } from "class-validator";
 
-export class GetCategoryDto {
+export class GetPlanningDto {
   @IsOptional()
   @IsString()
-  name?: string;
+  category_id?: string;
 
-  @IsOptional()
   @IsString()
-  icon_name?: string;
+  month: string;
+
+  @IsString()
+  year: string;
 
   @IsOptional()
   @Transform(({ value }) => Number(value) || null)
@@ -24,19 +26,20 @@ export class GetCategoryDto {
   nextId?: string;
 }
 
-export class CreateCategoryDto {
+export class CreatePlanningDto {
   @IsString()
-  name: string;
+  category_id: string;
 
   @IsOptional()
   @IsString()
   description?: string;
-  
-  @IsOptional()
-  @IsString()
-  icon_name?: string;
 
-  @IsOptional()
+  @IsNumber()
+  value: number;
+  
   @IsString()
-  icon_color?: string;
+  month: string;
+
+  @IsString()
+  year: string;
 }

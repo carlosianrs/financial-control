@@ -6,6 +6,7 @@ import { TransactionsRepository } from "./firestore/repositories/transactions.re
 import { UsersRepository } from "./firestore/repositories/users.repository";
 import { CategoriesRepository } from "./firestore/repositories/categories.repository";
 import { BankAccountsRepository } from "./firestore/repositories/bank_accounts.repository";
+import { PlanningsRepository } from "./firestore/repositories/plannings.repository";
 
 @Module({
   imports: [FirebaseAdminModule],
@@ -16,6 +17,7 @@ import { BankAccountsRepository } from "./firestore/repositories/bank_accounts.r
     UsersRepository,
     CategoriesRepository,
     BankAccountsRepository,
+    PlanningsRepository,
   ],
   exports: [
     FirebaseAdminService,
@@ -24,6 +26,7 @@ import { BankAccountsRepository } from "./firestore/repositories/bank_accounts.r
     UsersRepository,
     CategoriesRepository,
     BankAccountsRepository,
+    PlanningsRepository,
   ]
 })
 export class DatabaseModule {}

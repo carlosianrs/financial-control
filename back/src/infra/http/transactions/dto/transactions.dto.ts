@@ -10,7 +10,7 @@ export class GetTransactionDto {
 
   @IsOptional()
   @IsString()
-  category_id: string;
+  category_id?: string;
 
   @IsString()
   month: string;
