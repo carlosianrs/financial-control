@@ -116,21 +116,18 @@ export function SignUpForm() {
                 </Field>
               )}
             />
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? "Cadastrando..." : "Cadastrar"}
+            </Button>
+            <div className="text-center text-sm text-muted-foreground">
+              Já possui cadastro?{" "}
+              <Link href="/auth/sign-in" className="underline hover:text-primary">
+                Fazer Login
+              </Link>
+            </div>
           </FieldGroup>
         </form>
       </CardContent>
-      <CardFooter>
-        <Field orientation={'horizontal'}>
-          <div className="flex flex-col w-full items-center space-y-4">
-            <Button className="w-full" type="submit" form="form-sign-up">
-              {isLoading ? 'Carrengando...' : 'Cadastrar'}
-            </Button>
-            <Label>
-              Já possui cadastro?<Link href={'/auth/sign-in'} className="text-blue-500 underline hover:text-blue-800">Entrar</Link>
-            </Label>
-          </div>
-        </Field>
-      </CardFooter>
     </Card>
   )
 }

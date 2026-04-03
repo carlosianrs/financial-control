@@ -37,3 +37,9 @@ export async function updatePlanning(id: string, params: CreatePlanning): Promis
     .then(({ data, status }) => ({ ...data, status }))
     .catch(err => ({ success: false, message: err.message, status: err.response?.status }))
 }
+
+export async function deletePlanning(id: string): Promise<ParamsRequest<CreatePlanning[]> & ResponseError> {
+  return await api.delete(`/planning/${id}`)
+    .then(({ data, status }) => ({ ...data, status }))
+    .catch(err => ({ success: false, message: err.message, status: err.response?.status }))
+}

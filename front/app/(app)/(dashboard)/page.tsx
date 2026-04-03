@@ -23,7 +23,6 @@ export default function Page() {
   const [expensesPlanning, setExpensesPlanning] = useState<{ category: string, expenses: number, goal: number }[]>([]);
   const [balance, setBalance] = useState<{ expenses: number, income: number, current: number }>({ expenses: 0, income: 0, current: 0 });
   const [balancePending, setBalancePending] = useState<{ expenses: number, income: number, current: number }>({ expenses: 0, income: 0, current: 0 });
-  const [balancePlanning, setBalancePlanning] = useState<{ expenses: number, income: number, current: number }>({ expenses: 0, income: 0, current: 0 });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -67,10 +66,6 @@ export default function Page() {
         let expensesPending = 0;
         let balPending = 0;
 
-        let incomePlanning = 0;
-        let expensesPlanning = 0;
-        let balPlanning = 0;
-  
         res.data.forEach(transaction => {
           const paymentDate = transaction.payment_date?.toString().split('T')[0]
           
@@ -85,14 +80,6 @@ export default function Page() {
             expenses: (currentTransaction?.expenses || 0) + (!isIncome && !isPending ? transaction.value : 0),
           })
 
-          const currentBank = banks.get(transaction.bank_account.id)
-          banks.set(transaction.bank_account.id, {
-            name: transaction.bank_account.name,
-            value: (currentBank?.value || 0) + value,
-            color: transaction.bank_account.icon_color,
-            iconPath: transaction.bank_account.icon_path,
-          })
-  
           if (!isIncome) {
             const currentCategory = categories.get(transaction.category.id)
             categories.set(transaction.category.id, {
@@ -103,27 +90,28 @@ export default function Page() {
           }
 
           if (isPending) {
-            balPending += value;
             if (isIncome) incomePending += transaction.value;
             else expensesPending += transaction.value;
             
           } else {
+            const currentBank = banks.get(transaction.bank_account.id)
+            banks.set(transaction.bank_account.id, {
+              name: transaction.bank_account.name,
+              value: (currentBank?.value || 0) + value,
+              color: transaction.bank_account.icon_color,
+              iconPath: transaction.bank_account.icon_path,
+            })
+
             current += value;
             if (isIncome) income += transaction.value;
             else expenses += transaction.value;
           }
         })
 
+        balPending = (current + incomePending) - expensesPending;
+
         resCategories.data.forEach((category) => {
           const currentCategory = categories.get(category.id)
-
-          if (!currentCategory) {
-            categories.set(category.id, {
-              name: category.name,
-              value: 0,
-              color: category.icon_color
-            })
-          }
 
           const isIncomeCategory = category.name == 'Renda';
           const planningCategory = resPlannings.data?.find(rp => rp.category.id == category.id);
@@ -134,29 +122,25 @@ export default function Page() {
               expenses: currentCategory?.value || 0,
               goal: planningCategory?.value || 0,
             })
-            expensesPlanning += (planningCategory?.value || 0)
-          } else {
-            incomePlanning += (planningCategory?.value || 0)
           }
-
-          const value = (isIncomeCategory ? (planningCategory?.value || 0) : -(planningCategory?.value || 0));
-          balPlanning += value;
         })
         
         resPlannings.data?.forEach(rp => {
-          const planningExists = planningPerCategory.get(rp.category.id)
-          if (rp.category.name != 'Renda' && !planningExists) {
-            planningPerCategory.set(rp.category.id, {
-              category: rp.category.name,
-              expenses: 0,
-              goal: rp.value,
-            })
+          if (rp.category.name != 'Renda') {
+            const planningExists = planningPerCategory.get(rp.category.id)
+
+            if (!planningExists) {
+              planningPerCategory.set(rp.category.id, {
+                category: rp.category.name,
+                expenses: 0,
+                goal: rp.value,
+              })
+            }
           }
         });
 
         setBalance({ expenses, income, current });
         setBalancePending({ expenses: expensesPending, income: incomePending, current: balPending });
-        setBalancePlanning({ expenses: expensesPlanning, income: incomePending, current: balPlanning });
         setBalancePerBank(Array.from(banks.values()));
         setExpensesPerCategory(Array.from(categories.values()));
         setExpensesPlanning(Array.from(planningPerCategory.values()));
@@ -199,7 +183,7 @@ export default function Page() {
             <MainCard
               title="Receitas"
               value={balance.income}
-              valuePending={balancePending.income}
+              pending={{ value: balancePending.income }}
               glowColor="#22c55e"
               textColor="text-green-500"
               icon={{ name: 'TrendingUp', color: "bg-green-500/20" }}
@@ -208,7 +192,7 @@ export default function Page() {
             <MainCard
               title="Despesas"
               value={balance.expenses}
-              valuePending={balancePending.expenses}
+              pending={{ value: balancePending.expenses }}
               glowColor="#fb2c36"
               textColor="text-red-500"
               icon={{ name: 'TrendingDown', color: "bg-red-500/20" }}
@@ -217,7 +201,7 @@ export default function Page() {
             <MainCard
               title="Saldo Atual"
               value={balance.current}
-              valuePending={balancePending.current}
+              pending={{ title: 'Previsto', value: balancePending.current }}
               glowColor="#60a5fa"
               textColor="text-blue-400"
               icon={{ name: 'Wallet', color: "bg-blue-400/20" }}
@@ -250,33 +234,6 @@ export default function Page() {
             />
           </div>
           
-          <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1">
-            <MainCard
-              title="Receitas Prevista"
-              value={balancePlanning.income}
-              glowColor="#22c55e"
-              textColor="text-green-500"
-              icon={{ name: 'TrendingUp', color: "bg-green-500/20" }}
-            />
-
-            <MainCard
-              title="Despesas Prevista"
-              value={balancePlanning.expenses}
-              glowColor="#fb2c36"
-              textColor="text-red-500"
-              icon={{ name: 'TrendingDown', color: "bg-red-500/20" }}
-            />
-
-            <MainCard
-              title="Saldo Previsto"
-              value={balancePlanning.current}
-              valuePending={balancePending.current}
-              glowColor="#fa8500"
-              textColor="text-yellow-500"
-              icon={{ name: 'Wallet', color: "bg-blue-400/20" }}
-            />
-          </div>
-
           <ChartBarMultiple config={chartBarConfig} data={expensesPlanning} />
         </>
       )}

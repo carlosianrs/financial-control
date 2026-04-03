@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
 
 import {
   Card,
@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/card"
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
@@ -56,8 +58,27 @@ export function ChartBarMultiple({ config, data }: ChartBarMultipleProps) {
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="expenses" fill="var(--color-expenses)" radius={5} />
-            <Bar dataKey="goal" fill="var(--color-goal)" radius={5} />
+            <Bar dataKey="expenses" fill="var(--color-expenses)" radius={5}>
+              <LabelList
+                dataKey="expenses"
+                position="right"
+                offset={8}
+                className="fill-foreground"
+                fontSize={12}
+                formatter={(value: number) => value === 0 ? '' : value}
+              />
+            </Bar>
+            <Bar dataKey="goal" fill="var(--color-goal)" radius={5}>
+              <LabelList
+                dataKey="goal"
+                position="right"
+                offset={8}
+                className="fill-foreground"
+                fontSize={12}
+                formatter={(value: number) => value === 0 ? '' : value}
+              />
+            </Bar>
+            <ChartLegend content={<ChartLegendContent />} />
           </BarChart>
         </ChartContainer>
       </CardContent>

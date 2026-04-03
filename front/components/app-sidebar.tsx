@@ -39,7 +39,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUser();
 
   return (
-    <Sidebar className="border-r" variant="inset" {...props}>
+    <Sidebar variant="sidebar" className="p-2 bg-sidebar" {...props}>
       <SidebarHeader>
         <NavUser user={user!} />
       </SidebarHeader>

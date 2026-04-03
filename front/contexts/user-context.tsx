@@ -1,8 +1,8 @@
 "use client"
 
-import { deleteToken, logout } from "@/auth/auth";
+import { deleteToken } from "@/auth/auth";
 import { Loading } from "@/components/loading";
-import { getUser, middleware, User } from "@/http/api/get-user";
+import { getUser, User } from "@/http/api/get-user";
 import { HttpStatusCode } from "axios";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -39,25 +39,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    const checkToken = async () => {
-      try {
-        await middleware()
-      } catch {
-        toast.warning("Login expirado!", {
-          description: "Necessário realizar login novamente",
-          duration: 1000 * 30
-        })
-
-        await deleteToken();
-        return router.push('/');
-      }
-    }
-
-    const interval = setInterval(checkToken, 1000 * 2)
     fetchUser();
-
-    return () => clearInterval(interval);
-  }, [user]);
+  }, []);
 
   if (loading) return <Loading />
 

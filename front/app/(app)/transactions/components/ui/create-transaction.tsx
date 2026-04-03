@@ -46,6 +46,7 @@ const defaultValuesForm = {
 export function CreateTransaction({ currentTransaction, setCurrentTransaction, open, setOpen, mutate }: CreateTransactionProps) {
   const [banksAccount, setBanksAccount] = useState<{ name: string, value: string }[] | null>(null);
   const [categories, setCategories] = useState<{ name: string, value: string }[] | null>(null);
+  const [optionsCategories, setOptionsCategories] = useState<{ name: string, value: string }[] | null>(null);
   const [status, setStatus] = useState<{ name: string, value: string }[] | null>(null);
   const [type, setType] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -108,6 +109,10 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
           setCategories(resCategories.data.map(c => (
             { name: c.name, value: c.id }
           )));
+          setOptionsCategories(resCategories.data
+            .filter(c => type === 'income' ? c.name == 'Renda' : c.name != 'Renda')
+            .map(c => ({ name: c.name, value: c.id }))
+          );
         }
     
         if (resBankAccounts?.data) {
@@ -139,8 +144,8 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
   }, [currentTransaction])
 
   useEffect(() => {
-    const categoriesFilter = categories?.filter(c => type === 'income' ? c.name != 'Renda' : c.name == 'Renda')
-    setCategories(categoriesFilter || null);
+    const categoriesFilter = categories?.filter(c => type === 'income' ? c.name == 'Renda' : c.name != 'Renda')
+    setOptionsCategories(categoriesFilter || null);
 
     const statusFilter = statusList.filter(s => s.value !== (type === 'income' ? StatusTransaction.paid : StatusTransaction.received))
     setStatus(statusFilter);
@@ -194,7 +199,7 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
                       <FieldLabel>Categoria</FieldLabel>
                       <SelectItems
                         placeholder="Selecione a categoria"
-                        items={categories || []}
+                        items={optionsCategories || []}
                         onValueChange={field.onChange}
                         value={field.value}
                       />

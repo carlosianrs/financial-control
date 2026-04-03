@@ -38,8 +38,8 @@ export function SignInForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
+      <Card className="overflow-hidden p-0 border-transparent cursor-default">
+        <CardContent>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center text-center">
@@ -89,19 +89,12 @@ export function SignInForm() {
               </Button>
               <div className="text-center text-sm text-muted-foreground">
                 Ainda não possui conta?{" "}
-                <Link href="/auth/sign-up" className="underline">
+                <Link href="/auth/sign-up" className="underline hover:text-primary">
                   Criar conta
                 </Link>
               </div>
             </FieldGroup>
           </form>
-          <div className="relative hidden bg-muted md:block">
-            <img
-              src="/welcome.png"
-              alt="Login"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.8] dark:grayscale"
-            />
-          </div>
         </CardContent>
       </Card>
     </div>

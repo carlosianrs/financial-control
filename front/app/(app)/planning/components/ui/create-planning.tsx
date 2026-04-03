@@ -84,6 +84,10 @@ export function CreatePlanning({ currentPlanning, setCurrentPlanning, open, setO
     }
   }
 
+  async function handleDelete() {
+
+  }
+
   useEffect(() => {
     if (!open) return;
 
@@ -236,9 +240,14 @@ export function CreatePlanning({ currentPlanning, setCurrentPlanning, open, setO
                 </div>
               </FieldGroup>
               <DialogFooter>
-                <Button type="submit" form="form-planning" disabled={isProcessing} className="w-full text-white bg-linear-to-r from-blue-950 to-blue-600">
-                  {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />} Salvar
-                </Button>
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  <Button disabled={isProcessing} className=" w-full text-secondary bg-primary" onClick={() => {}}>
+                    {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />} {currentPlanning ? 'Excluir' : 'Cancelar'}
+                  </Button>
+                  <Button type="submit" form="form-planning" disabled={isProcessing} className="w-full text-white bg-linear-to-r from-blue-950 to-blue-600">
+                    {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />} Salvar
+                  </Button>
+                </div>
               </DialogFooter>
             </>
           )}

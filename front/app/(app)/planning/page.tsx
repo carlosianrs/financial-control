@@ -13,6 +13,7 @@ import { Icon } from "@/components/icon";
 import { Separator } from "@/components/ui/separator";
 import { formatMoney } from "@/lib/utils";
 import { CreatePlanning } from "./components/ui/create-planning";
+import { MainCard } from "@/components/main-card";
 
 export default function Page() {
   const [month, setMonth] = useState<string>(new Date().toLocaleString("pt-BR", { month: 'long' }));
@@ -20,6 +21,7 @@ export default function Page() {
   const [debouncedSearch, setDebouncedSearch] = useState<string | undefined>();
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [currentPlannig, setCurrentPlannig] = useState<Planning | null>(null);
+  const [balancePlanning, setBalancePlanning] = useState<{ income: number, expenses: number, current: number } | null>(null);
 
   const getParams = useCallback((pgIndx: number, previoudPageData: any) => {
     const baseQuery = debouncedSearch?.trim();
@@ -42,6 +44,26 @@ export default function Page() {
       if (err.status == 401) return;
     },
   })
+
+  useEffect(() => {
+    if (!plannings?.length) return;
+
+    let income = 0;
+    let expenses = 0;
+    let current = 0;
+
+    plannings[0]?.data?.forEach((planning) => {
+      if (planning.category.name == "Renda") {
+        income += planning.value;
+        current += planning.value;
+      } else {
+        expenses += planning.value;
+        current -= planning.value;
+      }
+    })
+
+    setBalancePlanning({ income, expenses, current })
+  }, [plannings])
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -94,6 +116,34 @@ export default function Page() {
           Adicionar planejamento
         </Button>
       </div>
+      
+      <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1">
+        <MainCard
+          title="Receitas Prevista"
+          value={balancePlanning?.income || 0}
+          glowColor="#22c55e"
+          textColor="text-green-500"
+          icon={{ name: 'TrendingUp', color: "bg-green-500/20" }}
+        />
+
+        <MainCard
+          title="Despesas Prevista"
+          value={balancePlanning?.expenses || 0}
+          glowColor="#fb2c36"
+          textColor="text-red-500"
+          icon={{ name: 'TrendingDown', color: "bg-red-500/20" }}
+        />
+
+        <MainCard
+          title="Saldo Previsto"
+          value={balancePlanning?.current || 0}
+          glowColor="#60a5fa"
+          textColor="text-blue-400"
+          icon={{ name: 'Wallet', color: "bg-blue-400/20" }}
+        />
+      </div>
+
+      <Separator />
 
       <CreatePlanning
         currentPlanning={currentPlannig}
