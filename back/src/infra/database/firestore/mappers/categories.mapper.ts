@@ -1,4 +1,4 @@
-import { CreateCategoryDto } from "src/infra/http/categories/dto/categories.dto";
+import { CreateCategoryDto } from "src/infra/http/api/categories/dto/categories.dto";
 import { Category } from "../types/categories.type";
 
 export const modelCategory = (doc: FirebaseFirestore.DocumentData): Category => ({

@@ -4,7 +4,7 @@ import { Month, Transaction, UpdateTransaction } from "../types/transactions.typ
 import { modelTransaction } from "../mappers/transactions.mapper";
 import { Timestamp } from "firebase-admin/firestore";
 import { ResponseFirebase } from "../types/users.type";
-import { GetTransactionDto } from "src/infra/http/transactions/dto/transactions.dto";
+import { GetTransactionDto } from "src/infra/http/api/transactions/dto/transactions.dto";
 
 @Injectable()
 export class TransactionsRepository {

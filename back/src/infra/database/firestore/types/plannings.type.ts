@@ -16,6 +16,7 @@ export type ResPlanning = {
 
 export type Planning = {
   id?: string;
+  user_id: string;
   category_id: string;
   description: string;
   value: number;

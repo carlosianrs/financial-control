@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { FirestoreService } from "../firestore.service";
-import { GetPlanningDto } from "src/infra/http/plannings/dto/plannings.dto";
+import { GetPlanningDto } from "src/infra/http/api/plannings/dto/plannings.dto";
 import { ResponseFirebase } from "../types/users.type";
 import { Planning, ResPlanning, UpdatePlanning } from "../types/plannings.type";
 import { Timestamp } from "firebase-admin/firestore";
@@ -12,8 +12,8 @@ export class PlanningsRepository {
     private readonly firestoreService: FirestoreService
   ) {}
 
-  async findAll({ limit, nextId, nextDate, ...params }: GetPlanningDto): Promise<ResponseFirebase<ResPlanning[]>> {
-    let query: any = this.firestoreService.plannings;
+  async findAll(userId: string, { limit, nextId, nextDate, ...params }: GetPlanningDto): Promise<ResponseFirebase<ResPlanning[]>> {
+    let query: any = this.firestoreService.plannings.where("user_id", "==", userId);
 
     Object.keys(params).forEach(key => {
       if (params[key]) {

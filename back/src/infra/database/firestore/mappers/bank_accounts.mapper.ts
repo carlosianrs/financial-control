@@ -1,4 +1,4 @@
-import { CreateBankAccountDto } from "src/infra/http/bank_accounts/dto/bank_accounts.dto";
+import { CreateBankAccountDto } from "src/infra/http/api/bank_accounts/dto/bank_accounts.dto";
 import { BankAccount } from "../types/bank_accounts.type";
 
 export const modelBankAccount = (doc: FirebaseFirestore.DocumentData): BankAccount => ({

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { FirestoreService } from "../firestore.service";
 import { ResponseFirebase, User } from "../types/users.type";
-import { GetCategoryDto } from "src/infra/http/categories/dto/categories.dto";
+import { GetCategoryDto } from "src/infra/http/api/categories/dto/categories.dto";
 import { Category, UpdateCategory } from "../types/categories.type";
 import { modelCategory } from "../mappers/categories.mapper";
 import { Timestamp } from "firebase-admin/firestore";

@@ -9,18 +9,18 @@ export class PlanningsService {
     private readonly planningsRepository: PlanningsRepository
   ) {}
 
-  async findMany(params: GetPlanningDto) {
-    return await this.planningsRepository.findAll(params);
+  async findMany(params: GetPlanningDto, userId: string) {
+    return await this.planningsRepository.findAll(userId, params);
   }
 
   async findById(id: string) {
     return await this.planningsRepository.findById(id);
   }
 
-  async create(params: CreatePlanningDto) {
-    const model = modelCreatePlanning(params);
+  async create(params: CreatePlanningDto, userId: string) {
+    const model = modelCreatePlanning(userId, params);
 
-    const planningWithCategoryExists = await this.planningsRepository.findAll({
+    const planningWithCategoryExists = await this.planningsRepository.findAll(userId, {
       category_id: model.category_id,
       month: params.month,
       year: params.year
@@ -34,8 +34,8 @@ export class PlanningsService {
     return { message: 'Categoria criada com sucesso' };
   }
 
-  async update(id: string, params: CreatePlanningDto) {
-    const model = modelCreatePlanning(params);
+  async update(id: string, params: CreatePlanningDto, userId: string) {
+    const model = modelCreatePlanning(userId, params);
     await this.planningsRepository.update(id, model);
     return { message: 'Categoria atualizada com sucesso' };
   }

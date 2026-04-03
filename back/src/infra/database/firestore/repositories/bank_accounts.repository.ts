@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { FirestoreService } from "../firestore.service";
-import { GetBankAccountDto } from "src/infra/http/bank_accounts/dto/bank_accounts.dto";
+import { GetBankAccountDto } from "src/infra/http/api/bank_accounts/dto/bank_accounts.dto";
 import { BankAccount, UpdateBankAccount } from "../types/bank_accounts.type";
 import { modelBankAccount } from "../mappers/bank_accounts.mapper";
 

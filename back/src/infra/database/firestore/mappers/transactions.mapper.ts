@@ -1,4 +1,4 @@
-import { CreateTransactionDto } from "src/infra/http/transactions/dto/transactions.dto";
+import { CreateTransactionDto } from "src/infra/http/api/transactions/dto/transactions.dto";
 import { Transaction } from "../types/transactions.type";
 
 export const modelTransaction = (doc: FirebaseFirestore.DocumentData): Transaction => ({
