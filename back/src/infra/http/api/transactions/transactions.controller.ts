@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { CreateTransactionDto, GetTransactionDto } from "./dto/transactions.dto";
 import { TransactionsService } from "./transactions.service";
 import { AtGuard } from "src/common/guards/at.guard";
@@ -18,7 +18,7 @@ export class TransactionsController {
 
   @Get('/:id')
   async findById(@Param('id') id: string) {
-    if (!id) throw new BadRequestException('Informar identificador do relatório');
+    if (!id) throw new BadRequestException('Informar identificador da transação');
 
     return await this.transactionsService.findById(id);
   }
@@ -30,8 +30,15 @@ export class TransactionsController {
 
   @Put('/:id')
   async update(@Param('id') id: string, @Body() params: CreateTransactionDto, @GetCurrentUser('user_id') userId: string) {
-    if (!id) throw new BadRequestException('Informar identificador do relatório');
+    if (!id) throw new BadRequestException('Informar identificador da transação');
     
     return await this.transactionsService.update(userId, id, params);
+  }
+
+  @Delete('/:id')
+  async delete(@Param('id') id: string) {
+    if (!id) throw new BadRequestException('Informar identificador da transação')
+
+    return await this.transactionsService.delete(id);
   }
 }

@@ -101,7 +101,7 @@ export function ChartAreaInteractive({ config, data }: ChartAreaInteractiveProps
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
+                const date = new Date(`${value}T00:00:00`)
                 return date.toLocaleDateString("pt-BR", {
                   month: "short",
                   day: "numeric",
@@ -119,7 +119,7 @@ export function ChartAreaInteractive({ config, data }: ChartAreaInteractiveProps
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("pt-BR", {
+                    return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR", {
                       month: "short",
                       day: "numeric",
                     })

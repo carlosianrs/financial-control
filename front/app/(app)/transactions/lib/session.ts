@@ -71,3 +71,9 @@ export async function updateTransaction(id: string, params: CreateTransaction): 
     .then(({ data, status }) => ({ ...data, status }))
     .catch(err => ({ success: false, message: err.message, status: err.response?.status }))
 }
+
+export async function deleteTransaction(id: string): Promise<ParamsRequest<CreateTransaction[]> & ResponseError> {
+  return await api.delete(`/transaction/${id}`)
+    .then(({ data, status }) => ({ ...data, status }))
+    .catch(err => ({ success: false, message: err.message, status: err.response?.status }))
+}

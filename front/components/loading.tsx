@@ -10,7 +10,7 @@ export function Loading() {
   return (
     <div className="min-h-screen w-full flex">
       {sidebarActive && (
-        <div className="hidden md:flex w-64 border-r p-4 flex-col gap-4 shrink-0">
+        <div className="hidden md:flex w-64 border-r p-4 flex-col gap-2 shrink-0">
           <Skeleton className="h-10 w-full" />
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-32" />

@@ -16,7 +16,7 @@ import { ParamsRequest } from "@/http/api/session"
 import { SWRInfiniteKeyedMutator } from "swr/infinite"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { planningsSchema, planningsSchemaType } from "../../lib/schemas"
-import { createPlanning, getCategories, updatePlanning } from "../../lib/session"
+import { createPlanning, deletePlanning, getCategories, updatePlanning } from "../../lib/session"
 import { toast } from "sonner"
 import { CreatePlanningSkeleton } from "./create-planning-skeleton"
 import { SelectItems } from "@/components/select-items"
@@ -85,7 +85,22 @@ export function CreatePlanning({ currentPlanning, setCurrentPlanning, open, setO
   }
 
   async function handleDelete() {
+    try {
+      setIsProcessing(true);
+      if (!currentPlanning) {
+        resetForm(false);
+        return;
+      };
 
+      await deletePlanning(currentPlanning?.id);
+      mutate();
+      toast.info('Sucesso', { description: 'Planejamento excluído com sucesso' })
+      resetForm(false);
+    } catch(err) {
+      toast.error('Falha', { description: 'Não foi possível excluir a planejamento' })
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   useEffect(() => {
@@ -241,7 +256,7 @@ export function CreatePlanning({ currentPlanning, setCurrentPlanning, open, setO
               </FieldGroup>
               <DialogFooter>
                 <div className="grid grid-cols-2 gap-2 w-full">
-                  <Button disabled={isProcessing} className=" w-full text-secondary bg-primary" onClick={() => {}}>
+                  <Button disabled={isProcessing} className=" w-full text-secondary bg-primary" onClick={handleDelete}>
                     {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />} {currentPlanning ? 'Excluir' : 'Cancelar'}
                   </Button>
                   <Button type="submit" form="form-planning" disabled={isProcessing} className="w-full text-white bg-linear-to-r from-blue-950 to-blue-600">

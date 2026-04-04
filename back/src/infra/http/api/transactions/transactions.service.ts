@@ -20,12 +20,17 @@ export class TransactionsService {
   async create(userId: string, params: CreateTransactionDto) {
     const model = modelCreateTransaction(userId, params);
     await this.transactionsRepository.create(model);
-    return { message: 'Relatório criado com sucesso' };
+    return { message: 'Transação criado com sucesso' };
   }
 
   async update(userId: string, id: string, params: CreateTransactionDto) {
     const { created_at, ...model } = modelCreateTransaction(userId, params);
     await this.transactionsRepository.update(id, model);
-    return { message: 'Relatório atualizado com sucesso' };
+    return { message: 'Transação atualizado com sucesso' };
+  }
+
+  async delete(id: string) {
+    await this.transactionsRepository.delete(id);
+    return { message: 'Transação excluída com sucesso' };
   }
 }

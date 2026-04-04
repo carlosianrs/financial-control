@@ -18,7 +18,7 @@ import { toast } from "sonner"
 import { SelectItems } from "@/components/select-items"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, TrendingDown, TrendingUp } from "lucide-react"
-import { createTransaction, getBanksAccount, getCategories, Transaction, updateTransaction } from "../../lib/session"
+import { createTransaction, deleteTransaction, getBanksAccount, getCategories, Transaction, updateTransaction } from "../../lib/session"
 import { statusList } from "@/lib/contants"
 import { CreateTransactionSkeleton } from "./create-transaction-skeleton"
 import { SWRInfiniteKeyedMutator } from "swr/infinite"
@@ -88,7 +88,26 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
       toast.info('Sucesso', { description: 'Transação adicionada com sucesso' })
       resetForm(false);
     } catch(err) {
-      toast.info('Falha', { description: 'Não foi possível concluir transação' })
+      toast.error('Falha', { description: 'Não foi possível concluir transação' })
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function handleDelete() {
+    try {
+      setIsProcessing(true);
+      if (!currentTransaction) {
+        resetForm(false);
+        return;
+      };
+
+      await deleteTransaction(currentTransaction?.id);
+      mutate();
+      toast.info('Sucesso', { description: 'Transação excluída com sucesso' })
+      resetForm(false);
+    } catch(err) {
+      toast.error('Falha', { description: 'Não foi possível excluir a transação' })
     } finally {
       setIsProcessing(false);
     }
@@ -300,9 +319,14 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
                 />
               </FieldGroup>
               <DialogFooter>
-                <Button type="submit" form="form-transaction" disabled={isProcessing} className="w-full text-white bg-linear-to-r from-blue-950 to-blue-600">
-                  {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />} Salvar
-                </Button>
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  <Button disabled={isProcessing} className=" w-full text-secondary bg-primary" onClick={handleDelete}>
+                    {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />} {currentTransaction ? 'Excluir' : 'Cancelar'}
+                  </Button>
+                  <Button type="submit" form="form-transaction" disabled={isProcessing} className="w-full text-white bg-linear-to-r from-blue-950 to-blue-600">
+                    {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />} Salvar
+                  </Button>
+                </div>
               </DialogFooter>
             </>
           )}
