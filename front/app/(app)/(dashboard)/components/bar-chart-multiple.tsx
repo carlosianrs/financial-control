@@ -35,9 +35,10 @@ export function ChartBarMultiple({ config, data }: ChartBarMultipleProps) {
         <CardDescription>Meta x Despesas de cada categoria</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={config}>
+        <ChartContainer config={config} className="w-full" style={{ height: `${data.length * 45}px` }} >
           <BarChart
             className="w-full"
+            height={data.length * 40}
             accessibilityLayer
             data={data}
             layout="vertical"

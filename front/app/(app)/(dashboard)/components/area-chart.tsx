@@ -37,7 +37,7 @@ export function ChartAreaInteractive({ config, data }: ChartAreaInteractiveProps
             Saldo diário no mês de março
           </CardDescription>
         </div>
-        <div className="flex flex-row items-center gap-4">
+        <div className="flex flex-col md:flex-row items-center gap-4 text-xs md:text-md">
           <div className="flex items-center gap-1">
             <Checkbox onCheckedChange={() => setDisplayBalance(prev => !prev)} checked={displayBalance} />
             <p>Saldo</p>
