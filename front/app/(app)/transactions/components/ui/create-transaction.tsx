@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { transactionsSchema, transactionsSchemaType } from "../../lib/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -23,7 +23,7 @@ import { statusList } from "@/lib/contants"
 import { CreateTransactionSkeleton } from "./create-transaction-skeleton"
 import { SWRInfiniteKeyedMutator } from "swr/infinite"
 import { ParamsRequest } from "@/http/api/session"
-import { StatusTransaction } from "../../lib/types"
+import { StatusTransaction, TypeTransaction } from "../../lib/types"
 
 type CreateTransactionProps = {
   open: boolean;
@@ -34,7 +34,7 @@ type CreateTransactionProps = {
 }
 
 const defaultValuesForm = {
-  type: 'expenses',
+  type: TypeTransaction.expenses,
   value: 0,
   desc: '',
   status: '',
@@ -60,6 +60,22 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
   async function onSubmit(data: transactionsSchemaType) {
     try {
       setIsProcessing(true);
+
+      const currentDate = new Date();
+
+      if (data.date.getTime() > currentDate.getTime() && data.status != StatusTransaction.pending) {
+        toast.error('Falha', { description: 'Apenas transações PENDENTES são válidas para pagamentos futuros.' })
+        setIsProcessing(false);
+        return;
+      }
+      
+      const diffDays = (data.date.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)
+      if (diffDays > 30) {
+        toast.error('Falha', { description: 'Não é permitido adicionar transações com data superior a 30 dias.' })
+        setIsProcessing(false);
+        return;
+      }
+
       const model = {
         type: type || data.type,
         value: data.value,
@@ -79,7 +95,7 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
       }
 
       if (result.success === false) {
-        toast.info('Falha', { description: result.message })
+        toast.error('Falha', { description: result.message })
         setIsProcessing(false);
         return;
       }
@@ -119,6 +135,9 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
     async function load() {
       try {
         setIsLoading(true)
+
+        setType(currentTransaction?.type || TypeTransaction.expenses)
+
         const [resCategories, resBankAccounts] = await Promise.all([
           getCategories(),
           getBanksAccount()
@@ -129,7 +148,7 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
             { name: c.name, value: c.id }
           )));
           setOptionsCategories(resCategories.data
-            .filter(c => type === 'income' ? c.name == 'Renda' : c.name != 'Renda')
+            .filter(c => (currentTransaction?.type || type) == TypeTransaction.income ? c.name == 'Renda' : c.name != 'Renda')
             .map(c => ({ name: c.name, value: c.id }))
           );
         }
@@ -139,6 +158,19 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
             { name: b.name, value: b.id }
           )));
         }
+
+        if (currentTransaction) {
+          form.setValue('bank', currentTransaction.bank_account.id)
+          form.setValue('category', currentTransaction.category.id)
+          form.setValue('date', new Date(currentTransaction.payment_date))
+          form.setValue('desc', currentTransaction.description)
+          form.setValue('status', currentTransaction.status)
+          form.setValue('type', currentTransaction.type)
+          form.setValue('value', currentTransaction.value)
+        } else {
+          form.reset(defaultValuesForm)
+        }
+    
       } finally {
         setIsLoading(false)
       }
@@ -148,34 +180,16 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
   }, [open])
 
   useEffect(() => {
-    if (currentTransaction) {
-      form.setValue('bank', currentTransaction.bank_account.id)
-      form.setValue('category', currentTransaction.category.id)
-      form.setValue('date', new Date(currentTransaction.payment_date))
-      form.setValue('desc', currentTransaction.description)
-      form.setValue('status', currentTransaction.status)
-      form.setValue('type', currentTransaction.type)
-      form.setValue('value', currentTransaction.value)
-    } else {
-      form.reset(defaultValuesForm)
-    }
-    setType(currentTransaction?.type || 'expenses')
-  }, [currentTransaction])
-
-  useEffect(() => {
-    const categoriesFilter = categories?.filter(c => type === 'income' ? c.name == 'Renda' : c.name != 'Renda')
+    const categoriesFilter = categories?.filter(c => type == TypeTransaction.income ? c.name == 'Renda' : c.name != 'Renda')
     setOptionsCategories(categoriesFilter || null);
-
-    const statusFilter = statusList.filter(s => s.value !== (type === 'income' ? StatusTransaction.paid : StatusTransaction.received))
-    setStatus(statusFilter);
-  }, [type])
-
-  useEffect(() => {
-    const currentStatus = form.getValues('status')
     const currentCategory = form.getValues('category')
-    if (!status?.some(s => s.value === currentStatus)) form.setValue('status', '')
-    if (!categories?.some(c => c.value === currentCategory)) form.setValue('category', '')
-  }, [categories, status, form])
+    if (!categoriesFilter?.some(c => c.value === currentCategory)) form.setValue('category', '')
+      
+    const statusFilter = statusList.filter(s => s.value !== (type == TypeTransaction.income ? StatusTransaction.paid : StatusTransaction.received))
+    setStatus(statusFilter);
+    const currentStatus = form.getValues('status')
+    if (!statusFilter?.some(s => s.value === currentStatus)) form.setValue('status', '')
+  }, [type])
 
   function resetForm(isOpen: boolean) {
     if (!isOpen) {
@@ -183,7 +197,7 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
         form.reset(defaultValuesForm);
         setBanksAccount(null);
         setCategories(null);
-        setType('expenses');
+        setType(TypeTransaction.expenses);
         setCurrentTransaction(null);
       }, 200)
     }
@@ -206,8 +220,8 @@ export function CreateTransaction({ currentTransaction, setCurrentTransaction, o
               <FieldGroup className="gap-3">
                 <Tabs value={type} onValueChange={setType} className="w-full">
                   <TabsList variant="line" className="grid grid-cols-2">
-                    <TabsTrigger value="income" className="data-[state=active]:after:bg-green-500"><TrendingUp className="text-green-500" /> Receitas</TabsTrigger>
-                    <TabsTrigger value="expenses" className="data-[state=active]:after:bg-red-500"><TrendingDown className="text-red-500" /> Despesas</TabsTrigger>
+                    <TabsTrigger value={TypeTransaction.income} className="data-[state=active]:after:bg-green-500"><TrendingUp className="text-green-500" /> Receitas</TabsTrigger>
+                    <TabsTrigger value={TypeTransaction.expenses} className="data-[state=active]:after:bg-red-500"><TrendingDown className="text-red-500" /> Despesas</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 <Controller
