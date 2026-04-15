@@ -21,12 +21,6 @@ export enum StatusColor {
   received = 'text-green-400',
 }
 
-export enum StatusFormatTransaction {
-  pending = 'Pendente',
-  paid = 'Pago',
-  received = 'Recebido',
-}
-
 export default function Page() {
   const [activeTab, setActiveTab] = useState("overview");
   const [categorySelect, setCategorySelect] = useState<string>();
@@ -188,15 +182,13 @@ export default function Page() {
 
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                           <div className="flex items-center gap-1 text-sm">
-                            <span>Status:</span>
-                            <span className={`font-bold ${StatusColor[transaction.status]}`}>
-                              {StatusFormatTransaction[transaction.status]}
-                            </span>
+                            <span>Data:</span>
+                            <span className={`font-bold `}>{new Date(transaction.payment_date).toLocaleDateString()}</span>
                           </div>
 
                           <div className="flex items-center gap-1 text-sm">
                             <span>Valor:</span>
-                            <span className={`font-bold ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
+                            <span className={`font-bold ${StatusColor[transaction.status]}`}>
                               {formatMoney(transaction.value)}
                             </span>
                           </div>
