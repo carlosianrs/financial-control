@@ -32,8 +32,12 @@ export class PlanningsRepository {
     const plannings = await query.get();
     if (plannings.empty) return { data: [], results: 0, nextCursor: null };
 
-    const categoryIds = plannings.docs?.map(doc => doc.data()?.category_id);
-    const categories = await this.firestoreService.categories.where("__name__", "in", categoryIds).get();
+    const categoryIds = new Set();
+    for (const doc of plannings.docs) {
+      if (doc.data()?.category_id) categoryIds.add(doc.data().category_id)
+    }
+    
+    const categories = await this.firestoreService.categories.where("__name__", "in", Array.from(categoryIds)).get();
     const categoryMap = new Map(categories.docs.map(doc => {
       const data = doc.data();
 

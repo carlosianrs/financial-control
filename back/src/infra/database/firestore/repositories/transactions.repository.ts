@@ -45,8 +45,14 @@ export class TransactionsRepository {
     const transactions = await query.get();
     if (transactions.empty) return { data: [], results: 0, nextCursor: null }
 
-    const categoryIds = transactions.docs?.map(doc => doc.data()?.category_id);
-    const categories = await this.firestoreService.categories.where("__name__", "in", categoryIds).get();
+    const categoryIds = new Set<string>();
+    const bankAccountIds = new Set<string>();
+    for (const doc of transactions.docs) {
+      if (doc.data()?.category_id) categoryIds.add(doc.data().category_id)
+      if (doc.data()?.bank_account_id) bankAccountIds.add(doc.data().bank_account_id)
+    }
+
+    const categories = await this.firestoreService.categories.where("__name__", "in", Array.from(categoryIds)).get();
     const categoryMap = new Map(categories.docs.map(doc => {
       const data = doc.data();
 
@@ -58,8 +64,7 @@ export class TransactionsRepository {
       }]
     }));
 
-    const bankAccountIds = transactions.docs?.map(doc => doc.data()?.bank_account_id);
-    const bankAccounts = await this.firestoreService.bank_accounts.where("__name__", "in", bankAccountIds).get();
+    const bankAccounts = await this.firestoreService.bank_accounts.where("__name__", "in", Array.from(bankAccountIds)).get();
     const bankAccountMap = new Map(bankAccounts.docs.map(doc => {
       const data = doc.data();
 
