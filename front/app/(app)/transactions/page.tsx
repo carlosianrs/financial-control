@@ -151,7 +151,7 @@ export default function Page() {
                 if (data?.length) {
                   return data.map((transaction, index) => (
                     <Card
-                      className="relative w-full h-full overflow-hidden rounded-xl bg-card hover:opacity-90 transition shadow-md shadow-blue-900/50"
+                      className="relative w-full h-full overflow-hidden rounded-xl bg-card hover:opacity-90 transition shadow-md shadow-zinc-300 dark:shadow-blue-900/50"
                       onClick={() => {
                         setCurrentTransaction(transaction);
                         setCreateOpen(true);
