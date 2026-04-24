@@ -5,7 +5,7 @@ import axios from "axios";
 import { cookies } from "next/headers";
 
 export const api = axios.create({
-  baseURL: `${serverConfig.host}:${serverConfig.port}`,
+  baseURL: `${serverConfig.url}`,
   timeout: 30000,
 })
 
