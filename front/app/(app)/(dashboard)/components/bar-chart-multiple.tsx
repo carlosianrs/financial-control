@@ -1,7 +1,5 @@
 "use client"
 
-import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts"
-
 import {
   Card,
   CardContent,
@@ -9,79 +7,48 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart"
+import { formatMoney } from "@/lib/utils";
 
-interface ChartBarMultipleProps {
-  config: ChartConfig;
-  data: {
-    category: string;
-    expenses: number;
-    goal: number;
-  }[];
+interface Goal {
+  category: string;
+  expenses: number;
+  goal: number;
 }
 
-export function ChartBarMultiple({ config, data }: ChartBarMultipleProps) {
+interface ChartBarMultipleProps {
+  goals: Goal[];
+}
+
+export function ChartBarMultiple({ goals }: ChartBarMultipleProps) {
   return (
     <Card className="bg-card shadow-lg shadow-muted-foreground/15">
       <CardHeader>
         <CardTitle>Planejamento de Despesas</CardTitle>
-        <CardDescription>Meta x Despesas de cada categoria</CardDescription>
+        <CardDescription>Despesas x Meta</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={config} className="w-full" style={{ height: `${data.length * 45}px` }} >
-          <BarChart
-            className="w-full"
-            height={data.length * 40}
-            accessibilityLayer
-            data={data}
-            layout="vertical"
-            margin={{
-              left: -5,
-            }}
-          >
-            <XAxis type="number" hide />
-            <YAxis
-              dataKey="category"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => value.slice(0, 6)}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar dataKey="expenses" fill="var(--color-expenses)" radius={5}>
-              <LabelList
-                dataKey="expenses"
-                position="right"
-                offset={8}
-                className="fill-foreground"
-                fontSize={12}
-                formatter={(value: number) => value === 0 ? '' : value}
-              />
-            </Bar>
-            <Bar dataKey="goal" fill="var(--color-goal)" radius={5}>
-              <LabelList
-                dataKey="goal"
-                position="right"
-                offset={8}
-                className="fill-foreground"
-                fontSize={12}
-                formatter={(value: number) => value === 0 ? '' : value}
-              />
-            </Bar>
-            <ChartLegend content={<ChartLegendContent />} />
-          </BarChart>
-        </ChartContainer>
+        <div className="flex flex-col gap-5">
+          {goals.map((g, i) => {
+            const percent = Math.round((g.expenses / g.goal) * 100) || 0;
+            const current = g.goal - g.expenses;
+
+            return (
+              <div key={i}>
+                <p className="text-sm font-medium mb-1">{g.category}</p>
+                <div className="flex justify-between mb-1.5">
+                  <span className="text-sm text-foreground">{formatMoney(g.expenses)}</span>
+                  <span className="text-sm text-foreground">{formatMoney(g.goal)}</span>
+                </div>
+                <div className="bg-[#333] rounded h-2 overflow-hidden">
+                  <div className="h-2 rounded"
+                    style={{ width: `${percent}%`, background: percent >= 100 ? '#ff0303' : '#0073ff' }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{percent == Infinity ? 0 : percent}% concluído | {formatMoney(current)} saldo</p>
+              </div>
+            );
+          })}
+        </div>
       </CardContent>
     </Card>
   )

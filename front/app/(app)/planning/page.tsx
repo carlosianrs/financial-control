@@ -117,7 +117,7 @@ export default function Page() {
         </Button>
       </div>
       
-      <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1">
+      <div className="relative grid gap-2 grid-cols-2 lg:grid-cols-3">
         <MainCard
           title="Receitas Prevista"
           value={balancePlanning?.income || 0}

@@ -110,7 +110,7 @@ export default function Page() {
 
         balPending = (current + incomePending) - expensesPending;
 
-        resCategories.data.forEach((category) => {
+        resCategories.data?.forEach((category) => {
           const currentCategory = categories.get(category.id)
 
           const isIncomeCategory = category.name == 'Renda';
@@ -140,7 +140,7 @@ export default function Page() {
         });
 
         setBalance({ expenses, income, current });
-        setBalancePending({ expenses: expensesPending, income: incomePending, current: balPending, display: incomePending || expensesPending ? true : false });
+        setBalancePending({ expenses: expensesPending, income: incomePending, current: balPending, display: balPending !== current });
         setBalancePerBank(Array.from(banks.values()));
         setExpensesPerCategory(Array.from(categories.values()));
         setExpensesPlanning(Array.from(planningPerCategory.values()));
@@ -179,7 +179,7 @@ export default function Page() {
         <DashboardSkeleton />
       ) : (
         <>
-          <div className="relative grid gap-2 grid-cols-2 lg:grid-cols-3">
+          <div className="relative grid gap-2 grid-cols-2 lg:grid-cols-4">
             <MainCard
               title="Receitas"
               value={balance.income}
@@ -201,9 +201,16 @@ export default function Page() {
             <MainCard
               title="Saldo Atual"
               value={balance.current}
-              pending={{ title: 'Previsto:', value: balancePending.current, display: balancePending.display }}
               glowColor="#60a5fa"
               textColor="text-blue-400"
+              icon={{ name: 'Wallet', color: "bg-blue-400/20" }}
+            />
+
+            <MainCard
+              title="Saldo Previsto"
+              value={balancePending.current}
+              glowColor="#ffc600"
+              textColor="text-yellow-400"
               icon={{ name: 'Wallet', color: "bg-blue-400/20" }}
             />
           </div>
@@ -234,7 +241,7 @@ export default function Page() {
             />
           </div>
           
-          <ChartBarMultiple config={chartBarConfig} data={expensesPlanning} />
+          <ChartBarMultiple goals={expensesPlanning} />
         </>
       )}
     </div>

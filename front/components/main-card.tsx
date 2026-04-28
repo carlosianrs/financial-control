@@ -30,7 +30,7 @@ export function MainCard({ title, value, pending, icon, textColor, glowColor }: 
       />
 
       <CardContent className="p-3 sm:p-4 lg:p-6">
-        <div className="flex flex-row items-center gap-3 sm:gap-4">
+        <div className="flex flex-col lg:flex-row items-start gap-3 sm:gap-4">
           {icon?.name && (
             <div className={cn(`flex shrink-0 items-center justify-center rounded-md ${icon?.color}`,
               "w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10"
