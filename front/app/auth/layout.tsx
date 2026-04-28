@@ -11,20 +11,23 @@ export default async function AuthLayout({ children }: Readonly<{ children: Reac
   }
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
-      <div className="flex w-full max-w-sm flex-col gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          <div className="flex size-6 items-center justify-center rounded-md text-primary-foreground">
+    <div className="relative flex min-h-svh items-center justify-center bg-muted">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.15),transparent_60%)]" />
+
+      <div className="relative flex w-full max-w-md flex-col gap-6">        
+        <div className="flex flex-col items-center gap-2 text-white">
+          <div className="flex items-center gap-2 font-semibold text-lg">
             <Image
               src="/logo.png"
               alt="Login"
-              className="h-6 w-6"
-              width={24}
-              height={24}
+              className="h-7 w-7"
+              width={28}
+              height={28}
             />
+            Controle Financeiro
           </div>
-          Controle Financeiro
-        </a>
+        </div>
+
         {children}
       </div>
     </div>
