@@ -42,7 +42,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen flex px-4 flex-col gap-5">
-      <div className={`relative grid gap-2 ${(isLoading || (categories && categories[0].data?.length)) ? 'sm:grid-cols-2 lg:grid-cols-3' : ''} grid-cols-1`}>
+      <div className={`relative grid gap-2 grid-cols-2 ${(isLoading || (categories && categories[0].data?.length)) ? 'lg:grid-cols-3' : ''}`}>
         {isLoading ? <LoadingCard /> :
           (size >= 0 && !errorCategories) ? (
             categories?.length && categories[0] && categories[0]?.data?.length ?
@@ -58,18 +58,18 @@ export default function Page() {
                         style={{ background: category.icon_color, opacity: 0.35 }}
                       />
     
-                      <CardContent className="p-2 items-center justify-center">
-                        <div className="flex items-center justify-start gap-3">
+                      <CardContent className="p-1 items-center justify-center">
+                        <div className="flex justify-start gap-3">
                           <div
-                            className="flex shrink-0 items-center justify-center h-12 w-12 ml-3 rounded-xl transition-colors duration-300"
+                            className="flex shrink-0 items-center justify-center h-9 w-9 sm:h-12 sm:w-12 ml-3 rounded-xl transition-colors duration-300"
                             style={{ backgroundColor: `${category.icon_color}33`, color: category.icon_color }}
                           >
-                            <Icon name={category.icon_name as any} className="size-6" />
+                            <Icon name={category.icon_name as any} className="size-4 sm:size-6" />
                           </div>
-                          <div className="flex flex-col items-start min-w-0">
-                            <p className="truncate">{category.name}</p>
+                          <div className="flex flex-col items-start leading-tight min-w-0">
+                            <p className="text-sm sm:text-lg truncate w-full">{category.name}</p>
                             <div className="flex flex-row gap-2 items-center justify-center">
-                              <span className="text-sm text-zinc-600 dark:text-zinc-400 break:words">Descrição: {category.description || 'Sem descrição'}</span>
+                              <span className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 break:words">Descrição: {category.description || 'Sem descrição'}</span>
                             </div>
                           </div>
                         </div>

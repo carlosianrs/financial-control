@@ -8,7 +8,7 @@ export function TitlePage() {
   const itemMenu = itemsMenu.find(item => item.url == "/" ? pathname == item.url : pathname.includes(item.url))
 
   return (
-    <div>
+    <div className="mt-2">
       <p className="text-xl md:text-2xl font-bold">{itemMenu?.title}</p>
       <p className="text-sm text-muted-foreground">{itemMenu?.description}</p>
     </div>

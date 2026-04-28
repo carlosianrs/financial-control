@@ -2,14 +2,16 @@
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSidebar } from "@/components/ui/sidebar"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export function Loading() {
   const { state } = useSidebar()
+  const isMobile = useIsMobile();
   const sidebarActive = state === "expanded"
 
   return (
     <div className="min-h-screen w-full flex">
-      {sidebarActive && (
+      {(sidebarActive && !isMobile) && (
         <div className="hidden md:flex w-64 border-r p-4 flex-col gap-2 shrink-0">
           <Skeleton className="h-10 w-full" />
           {Array.from({ length: 4 }).map((_, i) => (

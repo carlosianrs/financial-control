@@ -143,7 +143,7 @@ export default function Page() {
         mutate={mutate}
       />
 
-      <div className={`relative grid gap-3 ${(isLoading || (transactions && transactions[0].data?.length)) ? 'sm:grid-cols-2 lg:grid-cols-3' : ''} grid-cols-1`}>
+      <div className={`relative grid gap-3 grid-cols-2 ${(isLoading || (transactions && transactions[0].data?.length)) ? 'lg:grid-cols-3' : ''}`}>
         {isLoading ? <LoadingCard /> :
           (size >= 0 && !errorTransactions) ? (
             transactions?.length && transactions[0] && transactions[0]?.data?.length ?
@@ -163,30 +163,32 @@ export default function Page() {
                         style={{ background: transaction.category.icon_color, opacity: 0.5 }}
                       />
 
-                      <CardContent className="p-4 py-2 flex flex-col gap-4">
-                        <div className="flex items-start gap-3">
+                      <CardContent className="p-3 flex flex-col gap-2 sm:gap-4">
+                        <div className="flex items-start gap-2">
                           <div
-                            className="flex shrink-0 items-center justify-center h-12 w-12 rounded-xl"
+                            className="flex shrink-0 items-center justify-center h-9 w-9 sm:h-12 sm:w-12 rounded-xl"
                             style={{ backgroundColor: `${transaction.category.icon_color}33`, color: transaction.category.icon_color }}
                           >
-                            <Icon name={transaction.category.icon_name as any} className="size-6" />
+                            <Icon name={transaction.category.icon_name as any} className="size-4 sm:size-6" />
                           </div>
 
-                          <div className="flex flex-col leading-tight">
-                            <p className="font-bold text-lg truncate">{transaction.category.name}</p>
-                            <span className="text-sm wrap-break-words">{transaction.description || 'Sem descrição...'}</span>
+                          <div className="flex flex-col leading-tight min-w-0">
+                            <p className="font-bold text-sm sm:text-lg truncate">{transaction.category.name}</p>
+                            <span className="text-xs sm:text-sm text-muted-foreground">
+                              {transaction.description || 'Sem descrição...'}
+                            </span>
                           </div>
                         </div>
 
                         <Separator />
 
-                        <div className="flex items-center justify-between gap-4 flex-wrap">
-                          <div className="flex items-center gap-1 text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
+                          <div className="flex items-center gap-1 text-xs sm:text-sm">
                             <span>Data:</span>
-                            <span className={`font-bold `}>{new Date(transaction.payment_date).toLocaleDateString()}</span>
+                            <span className="font-bold">{new Date(transaction.payment_date).toLocaleDateString()}</span>
                           </div>
 
-                          <div className="flex items-center gap-1 text-sm">
+                          <div className="flex items-center gap-1 text-xs sm:text-sm">
                             <span>Valor:</span>
                             <span className={`font-bold ${StatusColor[transaction.status]}`}>
                               {formatMoney(transaction.value)}

@@ -58,10 +58,10 @@ export default function CardWithPieChart({ title, description, data }: CardAccou
                     />
                   </div>)}
 
-                  <span className="text-sm font-medium text-foreground">{item.name}</span>
+                  <span className="text-xs lg:text-sm font-medium text-foreground">{item.name}</span>
                 </div>
 
-                <span className="font-bold">{formatMoney(item.value)}</span>
+                <span className="font-bold text-sm lg:text-base">{formatMoney(item.value)}</span>
               </div>
             )
           }) : <p>Nenhum dado encontrado</p>}

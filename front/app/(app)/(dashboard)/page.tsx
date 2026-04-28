@@ -22,7 +22,7 @@ export default function Page() {
   const [dailyBalance, setDailyBalance] = useState<{ date: string, income: number, expenses: number }[]>([]);
   const [expensesPlanning, setExpensesPlanning] = useState<{ category: string, expenses: number, goal: number }[]>([]);
   const [balance, setBalance] = useState<{ expenses: number, income: number, current: number }>({ expenses: 0, income: 0, current: 0 });
-  const [balancePending, setBalancePending] = useState<{ expenses: number, income: number, current: number }>({ expenses: 0, income: 0, current: 0 });
+  const [balancePending, setBalancePending] = useState<{ expenses: number, income: number, current: number, display: boolean }>({ expenses: 0, income: 0, current: 0, display: false });
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -140,7 +140,7 @@ export default function Page() {
         });
 
         setBalance({ expenses, income, current });
-        setBalancePending({ expenses: expensesPending, income: incomePending, current: balPending });
+        setBalancePending({ expenses: expensesPending, income: incomePending, current: balPending, display: incomePending || expensesPending ? true : false });
         setBalancePerBank(Array.from(banks.values()));
         setExpensesPerCategory(Array.from(categories.values()));
         setExpensesPlanning(Array.from(planningPerCategory.values()));
@@ -179,11 +179,11 @@ export default function Page() {
         <DashboardSkeleton />
       ) : (
         <>
-          <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-3 grid-cols-1">
+          <div className="relative grid gap-2 grid-cols-2 lg:grid-cols-3">
             <MainCard
               title="Receitas"
               value={balance.income}
-              pending={{ value: balancePending.income }}
+              pending={{ value: balancePending.income, display: balancePending.display }}
               glowColor="#22c55e"
               textColor="text-green-500"
               icon={{ name: 'TrendingUp', color: "bg-green-500/20" }}
@@ -192,7 +192,7 @@ export default function Page() {
             <MainCard
               title="Despesas"
               value={balance.expenses}
-              pending={{ value: balancePending.expenses }}
+              pending={{ value: balancePending.expenses, display: balancePending.display }}
               glowColor="#fb2c36"
               textColor="text-red-500"
               icon={{ name: 'TrendingDown', color: "bg-red-500/20" }}
@@ -201,7 +201,7 @@ export default function Page() {
             <MainCard
               title="Saldo Atual"
               value={balance.current}
-              pending={{ title: 'Previsto', value: balancePending.current }}
+              pending={{ title: 'Previsto:', value: balancePending.current, display: balancePending.display }}
               glowColor="#60a5fa"
               textColor="text-blue-400"
               icon={{ name: 'Wallet', color: "bg-blue-400/20" }}
